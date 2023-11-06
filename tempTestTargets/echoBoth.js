@@ -6,4 +6,4 @@ export function achoo(input) {
  return 'achoo ' + input;
 }
 
-export default { echo, achoo };
+export default { achoo };

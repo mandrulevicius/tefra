@@ -3,7 +3,8 @@ function echo(input) {
 }
 
 function achoo(input) {
- return 'achoo ' + input;
+  throw Error('bad');
+  return 'achoo ' + input / 0;
 }
 
 export default { echo, achoo };
