@@ -1,3 +1,5 @@
+// while having tests for a test framework seems weird, its mostly for programmatically documenting behavior and edge cases
+
 import asserter from '../../asserter.js';
 import echoer from '../echoer.js';
 
