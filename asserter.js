@@ -1,3 +1,26 @@
+function equal(value1, value2) {
+  return returnResult(isEqual(value1, value2), value1, value2);
+}
+
+function equalRefs(ref1, ref2) {
+  return returnResult(ref1 === ref2, ref1, ref2);
+}
+
+function returnResult(pass, value1, value2) {
+  if (pass) return true;
+  throw { expected: value1, actual: value2 };
+}
+
+function throwsError(callback, expectedError, ...args) {
+  try {
+    callback(...args);
+    throw { actual: 'No error', expected: 'Error' };
+  } catch (error) {
+    if (error.message === expectedError.message) return true;
+    throw { actual: error.message, expected: expectedError.message };
+  }
+}
+
 function isEqual(value1, value2) {
   // could move most logic to setup, remove branches?
   const PRIMITIVES = ['string', 'number', 'boolean', 'bigint', 'undefined', 'symbol'];
@@ -25,4 +48,4 @@ function areObjectsDeepEqual(object1, object2) {
 // anonymous functions are equal if their contents are equal.
 // named functions are equal if their names AND contents are equal.
 
-export default { isEqual };
+export default { equal, equalRefs, throwsError, isEqual };

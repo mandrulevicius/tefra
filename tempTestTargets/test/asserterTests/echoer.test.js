@@ -1,9 +1,15 @@
 // while having tests for a test framework seems weird, its mostly for programmatically documenting behavior and edge cases
 
-import asserter from '../../asserter.js';
-import echoer from '../echoer.js';
+import asserter from '../../../asserter.js';
+import echoer from '../../echoer.js';
 
 //console.log('echoer', echoer)
+console.log('test1');
+console.log('echoer.asyncFunc();', echoer.asyncFunc('jack')); // return promise
+echoer.asyncFunc('joa').then(console.log); // promise result is passed into the function provided in .then
+console.log('test2 does not wait');
+console.log('await', await echoer.asyncFunc('shmoa')); // waits for completion promise result is returned directly
+console.log('test3');
 
 // primitives
 const primPass = asserter.isEqual(echoer.echo('t1'), 't1');

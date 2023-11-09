@@ -1,14 +1,15 @@
-//import asserter from '../../asserter.js';
-//import testFrame from '../../testFrame.js'; // test frame should have describe, it and asserter
+import asserter from '../../asserter.js';
+import tester from '../../tester.js'; 
 import echoer from '../echoer.js';
 
-// define test
-// run function
-// assert result (catch error automatically)
-
-console.log('test1');
-console.log('echoer.asyncFunc();', echoer.asyncFunc('jack'));
-echoer.asyncFunc('joa').then(console.log);
-console.log('await', await echoer.asyncFunc('shmoa'));
-console.log('test2');
-console.log('test3');
+tester.describe('testBlock1', () => {
+  tester.it('should give output x given input x when called', () => {
+    asserter.equal(echoer.echo('t1'), 't1');
+  });
+  tester.it('should fail', () => {
+    asserter.equal(echoer.echo('t1'), 't2');
+  });
+  tester.it('should give error', () => {
+    asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
+  });
+});
