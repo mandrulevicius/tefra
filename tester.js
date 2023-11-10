@@ -1,59 +1,74 @@
-import asserter from './asserter.js';
-// should conform to BDD style
-// should be able to nest describes
-
-let results = {};
-let currentGroupName; // this might not work with async
+const results = {};
+const groupStack = [];
 
 function describe(groupName, callback) {
-  results[groupName] = {};
-  currentGroupName = groupName;
+  const group = groupStack.length > 0 ? (groupStack[groupStack.length - 1][groupName] = {}) : (results[groupName] = {});
+  groupStack.push(group);
+  printGroupName(groupName, '  '.repeat(groupStack.length - 1));
   callback();
-  console.log(groupName);
-  printGroupResult(results[groupName]);
+  groupStack.pop();
 }
 
 function it(specName, callback) {
-  let groupName = currentGroupName; // this might be needed to prevent async problems
+  const group = groupStack[groupStack.length - 1];
   try {
     callback();
-    results[groupName][specName] = { status: 'pass' }; // double brackets
+    group[specName] = { status: 'pass' };
   } catch (error) {
     if (error instanceof Error) {
-      results[groupName][specName] = { status: 'error', error: error };
+      group[specName] = { status: 'error', error: error };
     } else {
-      results[groupName][specName] = { status: 'fail', error: error };
+      group[specName] = { status: 'fail', error: error };
     }
   }
+  printSpecResult(group[specName], specName, '  '.repeat(groupStack.length));
 }
 
-function printAllResults() {
-  console.log(`TEST OBJECT`);
-  console.log(results);
-  console.log(`END TEST OBJECT`);
-  for (const groupName in results) {
-    console.log(groupName);
-    printGroupResult(results[groupName]);
-  }
+function getResults() {
+  return results;
 }
 
-function printGroupResult(group) {
-  for (let specName in group) {
-    printSpecResult(group[specName], specName);
-  }
+function printGroupName(groupName, indent = '') {
+  console.log(`${indent}${groupName}`);
 }
 
-function printSpecResult(spec, specName) {
+// function printAllResults() {
+//   console.log(`TEST OBJECT`);
+//   console.log(results);
+//   console.log(`END TEST OBJECT`);
+//   for (const groupName in results) {
+//     printGroupResult(results[groupName], groupName);
+//   }
+// }
+
+// function printGroupResult(group, groupName, indent = '') {
+//   console.log(`${indent}${groupName}`);
+//   for (const specName in group) {
+//     if (typeof group[specName] === 'object' && group[specName].status) {
+//       printSpecResult(group[specName], specName, `${indent}  `);
+//     } else {
+//       printGroupResult(group[specName], specName, `${indent}  `);
+//     }
+//   }
+// }
+
+function printSpecResult(spec, specName, indent = '') {
   if (spec.status === 'pass') {
-    console.log(`  ${specName}: pass`);
+    console.log(`${indent}${specName}: pass`);
   } else if (spec.status === 'fail') {
-    console.log(`  ${specName}: fail`);
-    console.log('    ', JSON.stringify(spec.error));
+    console.log(`${indent}${specName}: fail`);
+    console.log(`${indent}  `, JSON.stringify(spec.error));
   } else {
-    console.log(`  ${specName} -`, spec.error);
+    console.log(`${indent}${specName} -`, spec.error);
   }
 }
 
-export default { describe, it, printAllResults };
+// move printer to different file
+
+export default { describe, it, getResults }; // this is for one file only.
 
 // will want to switch outputs to file, maybe even to browser, or just another service.
+
+// use case 1 - log the output (as you go)
+// use case 2 - save the output to file (all at once)
+// use case 3 - return the object
