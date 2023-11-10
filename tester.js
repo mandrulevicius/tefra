@@ -1,10 +1,30 @@
+import consoleLogger from './consoleLogger.js';
+
 const results = {};
 const groupStack = [];
+const logToConsole = true;
+
+// tester is core, should not care about output types. But real life is messy, so here we are.
+// in this case, for a test framework, smooth consumer experience is absolutely essential,
+// so better to leave a dependency rather than overengineer and add extra baggage for consumer.
+// why not have both? expose the abstraction
+// currently, dont see any gains for the additional complexity.
+// if at any point potential gains become apparent, will refactor.
+
+function setLogToConsole(newLogToConsole) {
+  logToConsole = newLogToConsole;
+}
+
+function getResults() {
+  return results;
+}
 
 function describe(groupName, callback) {
-  const group = groupStack.length > 0 ? (groupStack[groupStack.length - 1][groupName] = {}) : (results[groupName] = {});
+  const group = groupStack.length > 0 ?
+    (groupStack[groupStack.length - 1][groupName] = {}) :
+    (results[groupName] = {});
   groupStack.push(group);
-  printGroupName(groupName, '  '.repeat(groupStack.length - 1));
+  if (logToConsole) consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length - 1));
   callback();
   groupStack.pop();
 }
@@ -21,54 +41,30 @@ function it(specName, callback) {
       group[specName] = { status: 'fail', error: error };
     }
   }
-  printSpecResult(group[specName], specName, '  '.repeat(groupStack.length));
+  if (logToConsole)
+    consoleLogger.logSpecResult(group[specName], specName, '  '.repeat(groupStack.length));
 }
 
-function getResults() {
-  return results;
-}
-
-function printGroupName(groupName, indent = '') {
-  console.log(`${indent}${groupName}`);
-}
-
-// function printAllResults() {
-//   console.log(`TEST OBJECT`);
-//   console.log(results);
-//   console.log(`END TEST OBJECT`);
-//   for (const groupName in results) {
-//     printGroupResult(results[groupName], groupName);
-//   }
-// }
-
-// function printGroupResult(group, groupName, indent = '') {
-//   console.log(`${indent}${groupName}`);
-//   for (const specName in group) {
-//     if (typeof group[specName] === 'object' && group[specName].status) {
-//       printSpecResult(group[specName], specName, `${indent}  `);
-//     } else {
-//       printGroupResult(group[specName], specName, `${indent}  `);
-//     }
-//   }
-// }
-
-function printSpecResult(spec, specName, indent = '') {
-  if (spec.status === 'pass') {
-    console.log(`${indent}${specName}: pass`);
-  } else if (spec.status === 'fail') {
-    console.log(`${indent}${specName}: fail`);
-    console.log(`${indent}  `, JSON.stringify(spec.error));
-  } else {
-    console.log(`${indent}${specName} -`, spec.error);
-  }
-}
-
-// move printer to different file
-
-export default { describe, it, getResults }; // this is for one file only.
+export default { describe, it, getResults, setLogToConsole }; // this is for one file only.
 
 // will want to switch outputs to file, maybe even to browser, or just another service.
 
-// use case 1 - log the output (as you go)
-// use case 2 - save the output to file (all at once)
-// use case 3 - return the object
+// DONE use case 1 - log the output (as you go)
+// use case 2 - save the output to file (all at once, or maybe also as you go?)
+// need to be able to turn off one or the other. or both.
+
+// might need serious refactoring, depending on how the multiple file implementation goes.
+
+
+// middleLayer.js
+/*
+import testerCore from './testerCore.js';
+
+async function setOutputter(outputterName) {
+  const outputter = await import(`./${outputterName}.js`);
+  testerCore.setOutputter(outputter);
+}
+
+export default { ...testerCore, setOutputter };
+
+*/
