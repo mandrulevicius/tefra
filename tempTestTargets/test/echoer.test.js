@@ -13,3 +13,5 @@ tester.describe('testBlock1', () => {
     asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
   });
 });
+
+tester.printResults()
