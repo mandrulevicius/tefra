@@ -3,7 +3,9 @@ import './tempTestTargets/test/echoer.test.js'
 //import './tempTestTargets/test/echoDef.test.js'
 //import './tempTestTargets/test/echoNamed.test.js'
 //import './tempTestTargets/test/echoBoth.test.js'
-import './tempTestTargets/test/asserterTests/echoer.test.js' //regression test
+
+//regression test
+//import './tempTestTargets/test/asserterTests/echoer.test.js'
 
 
 // THIS IS FOR PACKAGE EXPOSURE

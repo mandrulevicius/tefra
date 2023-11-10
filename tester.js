@@ -3,48 +3,57 @@ import asserter from './asserter.js';
 // should be able to nest describes
 
 let results = {};
-let currentDescription; // this might not work with async
+let currentGroupName; // this might not work with async
 
-function describe(description, callback) {
-  results[description] = {};
-  currentDescription = description;
+function describe(groupName, callback) {
+  results[groupName] = {};
+  currentGroupName = groupName;
   callback();
+  console.log(groupName);
+  printGroupResult(results[groupName]);
 }
 
-function it(description, callback) {
-  let parent = currentDescription;
+function it(specName, callback) {
+  let groupName = currentGroupName; // this might be needed to prevent async problems
   try {
     callback();
-    results[parent][description] = { status: 'pass' };
+    results[groupName][specName] = { status: 'pass' }; // double brackets
   } catch (error) {
     if (error instanceof Error) {
-      results[parent][description] = { status: 'error', error: error };
+      results[groupName][specName] = { status: 'error', error: error };
     } else {
-      results[parent][description] = { status: 'fail', error: error };
+      results[groupName][specName] = { status: 'fail', error: error };
     }
   }
 }
 
-function printResults() {
-  console.log(`ETST`);
+function printAllResults() {
+  console.log(`TEST OBJECT`);
   console.log(results);
-  console.log(`ETST`);
-  for (let test in results) {
-    console.log(test);
-    for (let subtest in results[test]) {
-      if (results[test][subtest].status === 'pass') {
-        console.log(`  ${subtest}: pass`);
-      } else if (results[test][subtest].status === 'fail') {
-        console.log(`  ${subtest}: fail`);
-        console.log('    ', JSON.stringify(results[test][subtest].error));
-      } else {
-        console.log(`  ${subtest} -`, results[test][subtest].error);
-      }
-    }
+  console.log(`END TEST OBJECT`);
+  for (const groupName in results) {
+    console.log(groupName);
+    printGroupResult(results[groupName]);
   }
 }
-// will want to switch outputs to file, maybe even to browser.
 
-export default { describe, it, printResults };
+function printGroupResult(group) {
+  for (let specName in group) {
+    printSpecResult(group[specName], specName);
+  }
+}
 
-// maybe later should output results one by one, in a way defined in settings.
+function printSpecResult(spec, specName) {
+  if (spec.status === 'pass') {
+    console.log(`  ${specName}: pass`);
+  } else if (spec.status === 'fail') {
+    console.log(`  ${specName}: fail`);
+    console.log('    ', JSON.stringify(spec.error));
+  } else {
+    console.log(`  ${specName} -`, spec.error);
+  }
+}
+
+export default { describe, it, printAllResults };
+
+// will want to switch outputs to file, maybe even to browser, or just another service.
