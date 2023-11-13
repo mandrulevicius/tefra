@@ -15,6 +15,8 @@ function logSpecResult(spec, specName, indent = '') {
 
 export default { logGroupName, logSpecResult };
 
+// TODO use or delete after multiple file implementation is done
+// POSSIBLY NEEDED CODE
 // function logAllResults() {
 //   for (const groupName in results) {
 //     logGroupResult(results[groupName], groupName);

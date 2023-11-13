@@ -4,13 +4,6 @@ const results = {};
 const groupStack = [];
 const logToConsole = true;
 
-// tester is core, should not care about output types. But real life is messy, so here we are.
-// in this case, for a test framework, smooth consumer experience is absolutely essential,
-// so better to leave a dependency rather than overengineer and add extra baggage for consumer.
-// why not have both? expose the abstraction
-// currently, dont see any gains for the additional complexity.
-// if at any point potential gains become apparent, will refactor.
-
 function setLogToConsole(newLogToConsole) {
   logToConsole = newLogToConsole;
 }
@@ -44,18 +37,25 @@ function it(specName, callback) {
   if (logToConsole)
     consoleLogger.logSpecResult(group[specName], specName, '  '.repeat(groupStack.length));
 }
+// REMINDER: this is for one file only.
+export default { describe, it, getResults, setLogToConsole }; 
+// DESIGN:
+// results can be output anywhere, not the responsibility of tester
+// in fact, even logging to console should be a concern of tester
+// we are making this concession for now for easy of use, but might remove in the future if unnecessary
 
-export default { describe, it, getResults, setLogToConsole }; // this is for one file only.
-
-// will want to switch outputs to file, maybe even to browser, or just another service.
-
-// DONE use case 1 - log the output (as you go)
-// use case 2 - save the output to file (all at once, or maybe also as you go?)
-// need to be able to turn off one or the other. or both.
+// DESIGN:
+// tester is core, should not care about output types. But real life is messy, so here we are.
+// in this case, for a test framework, smooth consumer experience is absolutely essential,
+// so better to leave a dependency rather than overengineer and add extra baggage for consumer.
+// why not have both? expose the abstraction
+// currently, dont see any gains for the additional complexity.
+// if at any point potential gains become apparent, will refactor.
 
 // might need serious refactoring, depending on how the multiple file implementation goes.
 
-
+// TODO use or delete after multiple file implementation is done
+// POSSIBLE REFACTOR:
 // middleLayer.js
 /*
 import testerCore from './testerCore.js';
