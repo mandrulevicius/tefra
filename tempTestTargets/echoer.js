@@ -22,7 +22,9 @@ function badStringInput(input, arg2) {
     }
   };
   // this is a bit clunky, only use at boundaries
-  return input + arg2;
+  // also kind of expects object as an output with success: true
+  // so certainly should only be used in boundaries
+  return { success: true, output: input + arg2 };
 }
 
 function errFunc(input) {

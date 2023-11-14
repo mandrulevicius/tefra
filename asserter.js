@@ -8,7 +8,7 @@ function equalRefs(ref1, ref2) {
 
 function returnResult(pass, value1, value2) {
   if (pass) return true;
-  throw { expected: value1, actual: value2 };
+  throw { actual: value1, expected: value2 };
 }
 
 function throwsError(callback, expectedError, ...args) {
