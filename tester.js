@@ -7,6 +7,7 @@ let insideIt = false; // might have issues with async, but will solve as we go.
 // also having module-wide internal state means it has to be reset every time something goes wrong
 // because otherwise, if the thrown error is caught, program execution will continue
 // other function calls will then use the incorrect state
+// SOLVED by setting to false if error.
 
 function setLogToConsole(newLogToConsole) {
   logToConsole = newLogToConsole;
@@ -19,13 +20,36 @@ function getResults() {
 function describe(groupName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new Error(`Invalid structure "${groupName}": 'describe' function cannot be nested inside 'it' function.`);
+    throw new Error(
+      `Invalid structure group "${groupName}": 'describe' function cannot be nested inside 'it' function.`
+    );
   }
-  const group = groupStack.length > 0 ?
-    (groupStack[groupStack.length - 1][groupName] = {}) :
-    (results[groupName] = {});
+  if (!groupName || typeof groupName !== "string") {
+    throw new Error(
+      `Invalid structure group "${groupName}": group must have a string name`
+      // improve error messages to both say what is wrong, and how to fix it.
+    );
+  }
+  if (!callback || typeof callback !== "function") {
+    throw new Error(
+      `Invalid structure group "${groupName}": group must have a function callback`
+    );
+  }
+  let group = results;
+  for (const key in group) {
+    if (groupName in group[key]) {
+      throw new Error(
+        `Invalid structure group "${groupName}": group name already exists`
+      );
+    }
+  }
+  group =
+    groupStack.length > 0
+      ? (groupStack[groupStack.length - 1][groupName] = {})
+      : (results[groupName] = {});
   groupStack.push(group);
-  if (logToConsole) consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length - 1));
+  if (logToConsole)
+    consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
   callback();
   groupStack.pop();
 }
@@ -33,28 +57,51 @@ function describe(groupName, callback) {
 function it(specName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new Error(`Invalid structure spec "${specName}": 'it' function cannot be nested inside another 'it' function.`);
+    throw new Error(
+      `Invalid structure spec "${specName}": 'it' function cannot be nested inside another 'it' function.`
+    );
   }
-  insideIt = true;
+  if (!specName || typeof specName !== "string") {
+    throw new Error(
+      `Invalid structure spec "${specName}": spec must have a string name`
+    );
+  }
+  if (!callback || typeof callback !== "function") {
+    throw new Error(
+      `Invalid structure spec "${specName}": spec must have a function callback`
+    );
+  }
   const group = groupStack[groupStack.length - 1];
   if (!group) {
-    insideIt = false;
-    throw new Error(`Invalid structure spec "${specName}": 'it' function must have 'describe' function as parent.`);
+    throw new Error(
+      `Invalid structure spec "${specName}": 'it' function must have 'describe' function as parent.`
+    );
   }
+  if (specName in group) {
+    throw new Error(
+      `Invalid structure spec "${specName}": spec name already exists`
+    );
+  }
+  insideIt = true;
   try {
     callback();
-    group[specName] = { status: 'pass' };
+    group[specName] = { status: "pass" };
   } catch (error) {
     if (error instanceof Error) {
-      group[specName] = { status: 'error', error: error };
+      group[specName] = { status: "error", error: error };
     } else {
-      group[specName] = { status: 'fail', error: error };
+      group[specName] = { status: "fail", error: error };
     }
   }
   if (logToConsole)
-    consoleLogger.logSpecResult(group[specName], specName, '  '.repeat(groupStack.length));
+    consoleLogger.logSpecResult(
+      group[specName],
+      specName,
+      "  ".repeat(groupStack.length)
+    );
   insideIt = false;
 }
+
 // REMINDER: this is for one file only.
 export default { describe, it, getResults, setLogToConsole };
 // DESIGN:

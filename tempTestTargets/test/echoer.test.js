@@ -3,7 +3,7 @@ import tester from '../../tester.js';
 import echoer from '../echoer.js';
 
 tester.describe('testBlockOuter', () => {
-  tester.describe('testBlock1', () => {
+  tester.describe('testBlock', () => {
     tester.it('should give output x given input x when called', () => {
       asserter.equal(echoer.echo('t1'), 't1');
     });
@@ -40,7 +40,10 @@ tester.describe('testBlockOuter', () => {
     tester.it('2should give output x given input x when called', () => {
       asserter.equal(echoer.echo('t1'), 't1');
     });
-    tester.it('2should fail', () => {
+    tester.it(' ', () => {
+      asserter.equal(echoer.echo('t1'), 't2');
+    });
+    tester.it('should fail2', () => {
       asserter.equal(echoer.echo('t1'), 't2');
     });
     tester.it('2should give error', () => {
@@ -85,8 +88,6 @@ tester.describe('testEmptyIt', () => {
   });
 });
 
-// need to clear state of insideIt after each call?
-
 // try {
 //   tester.it('it without describe', () => {
 //     asserter.equal(echoer.echo('t1'), 't1');
@@ -95,33 +96,34 @@ tester.describe('testEmptyIt', () => {
 //   console.log(error)
 // }
 
-// further code  behaves differently if previous exists, doesnt, or is wrapped in try/catch.
-// maybe shouldnt wrap test suite in try catch, but someone might.
-
-  tester.describe('outer describe', () => {
-    tester.it('it with nested describe', () => {
-      tester.describe('nested describe inside it', () => {
-        tester.it('inner it', () => {
-          asserter.equal(echoer.echo('t1'), 't1');
-        });
-      });
-    });
-  });
-
+// try {
+//   tester.describe('outer describe', () => {
+//     tester.it('it with nested describe', () => {
+//       tester.describe('nested describe inside it', () => {
+//         tester.it('inner it', () => {
+//           asserter.equal(echoer.echo('t1'), 't1');
+//         });
+//       });
+//     });
+//   });
+// } catch (error) {
+//   console.log(error)
+// }
 
 // tester.describe(23, () => {
 // });
 
-// tester.describe(23, 'bad describe arg');
 
-// tester.describe();
+//tester.describe('no func', 'bad describe arg');
+
+//tester.describe();
 // tester.describe('no function in describe');
 
 // tester.describe('test bad it', () => {
-//   tester.it(23, () => {
-//   });
+//    tester.it(23, () => {
+//    });
   
-//   tester.it(23, 'bad it arg');
+//   tester.it('ba', 'bad it arg');
   
 //   tester.it();
 //   tester.it('no function in it');
