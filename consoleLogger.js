@@ -7,14 +7,21 @@ function logSpecResult(spec, specName, indent = '') {
     console.log(`${indent}${specName}: pass`);
   } else if (spec.status === 'fail') {
     console.log(`${indent}${specName}: fail`);
-    console.log(`${indent}  `, `Actual: ${JSON.stringify(spec.outputs.actual)}`);
-    console.log(`${indent}  `, `Expect: ${JSON.stringify(spec.outputs.expected)}`);
+    console.log(`${indent}  `, `Actual: ${JSON.stringify(spec.output.actual)}`);
+    console.log(`${indent}  `, `Expect: ${JSON.stringify(spec.output.expected)}`);
   } else {
     console.log(`${indent}${specName} -`, spec.error);
   }
 }
 
-export default { logGroupName, logSpecResult };
+function logTotals(totals) {
+  console.log(`Status: ${totals.status}`);
+  console.log(`Passed: ${totals.passed}`);
+  console.log(`Failed: ${totals.failed}`);
+  console.log(`Total: ${totals.total}`);
+}
+
+export default { logGroupName, logSpecResult, logTotals };
 
 // TODO use or delete after multiple file implementation is done
 // POSSIBLY NEEDED CODE
