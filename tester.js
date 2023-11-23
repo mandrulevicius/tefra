@@ -10,7 +10,7 @@ function Result(status, passed = 0, failed = 0, errors = 0, total = 0, details =
   // If I really want to have proper internal derivate values, will have to make it into a class
 }
 
-function updateResults(parent, groupWithResult) {
+function updateParentResults(parent, groupWithResult) {
   parent.passed += groupWithResult.passed;
   parent.failed += groupWithResult.failed;
   parent.errors += groupWithResult.errors;
@@ -38,8 +38,19 @@ export function setLogToConsole(newLogToConsole) {
 export function getResults() {
   // console.log('res', results);
   // console.log('res.details', results.details);
-  // console.log('res.details.testBlockOuter.details', results.details.testBlockOuter.details);
-  return results;
+  // if (results.details.testBlockOuter3) console.log('res.details.testBlockOuter3.details.testBlock.details', results.details.testBlockOuter3.details.testBlock.details);
+  // if (results.details) console.log('res.details.tester', results.details.tester);
+  // if (results.details.tester) console.log('res.details.tester.details', results.details.tester.details);
+  return JSON.parse(JSON.stringify(results));
+}
+
+export function clearResults() {
+  results.passed = 0;
+  results.failed = 0;
+  results.errors = 0;
+  results.total = 0;
+  results.status = undefined;
+  results.details = {};
 }
 
 export function describe(groupName, callback) {
@@ -60,10 +71,10 @@ export function describe(groupName, callback) {
       `Invalid structure group "${groupName}": group must have a function callback`
     );
   }
-  const parentGroup = groupStack[groupStack.length - 1];
+  const parentGroup = groupStack[groupStack.length - 1] || results;
   if (parentGroup instanceof Result) {
     for (const key in parentGroup.details) {
-      if (groupName in parentGroup.details[key]) {
+      if (groupName === key) {
         throw new Error(
           `Invalid structure group "${groupName}": group name already exists`
         );
@@ -78,10 +89,7 @@ export function describe(groupName, callback) {
     consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
   callback();
   groupStack.pop();
-  if (parentGroup instanceof Result) updateResults(parentGroup, group);
-  else {
-    updateResults(results, group);
-  }
+  updateParentResults(parentGroup, group);
   //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
   // log file totals when running from test runner
 }
@@ -118,19 +126,19 @@ export function it(specName, callback) {
   group.total += 1;
   try {
     callback();
-    group.details[specName] = { status: "pass" };
+    group.details[specName] = { status: "passed" };
     group.passed += 1;
   } catch (error) {
     if (error instanceof Error) {
       group.details[specName] = { status: "error", error: error };
       group.errors += 1;
     } else {
-      group.details[specName] = { status: "fail", output: error };
+      group.details[specName] = { status: "failed", output: error };
       group.failed += 1;
     }
   }
-  if (group.passed === group.total) group.status = "pass";
-  if (group.failed > 0) group.status = "fail";
+  if (group.passed === group.total) group.status = "passed";
+  if (group.failed > 0) group.status = "failed";
   if (group.errors > 0) group.status = "error";
   if (logToConsole)
     consoleLogger.logSpecResult(
@@ -142,7 +150,7 @@ export function it(specName, callback) {
 }
 
 // REMINDER: this is for one file only.
-export default { describe, it, getResults, setLogToConsole };
+export default { describe, it, getResults, setLogToConsole, clearResults };
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester
 // in fact, even logging to console should be a concern of tester

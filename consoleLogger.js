@@ -3,10 +3,10 @@ function logGroupName(groupName, indent = '') {
 }
 
 function logSpecResult(spec, specName, indent = '') {
-  if (spec.status === 'pass') {
-    console.log(`${indent}${specName}: pass`);
-  } else if (spec.status === 'fail') {
-    console.log(`${indent}${specName}: fail`);
+  if (spec.status === 'passed') {
+    console.log(`${indent}${specName}: passed`);
+  } else if (spec.status === 'failed') {
+    console.log(`${indent}${specName}: failed`);
     console.log(`${indent}  `, `Actual: ${JSON.stringify(spec.output.actual)}`);
     console.log(`${indent}  `, `Expect: ${JSON.stringify(spec.output.expected)}`);
   } else {
