@@ -2,22 +2,22 @@ import consoleLogger from './consoleLogger.js';
 
 const results = {};
 const groupStack = [];
-const logToConsole = true;
+let logToConsole = true;
 let insideIt = false; // might have issues with async, but will solve as we go.
 // also having module-wide internal state means it has to be reset every time something goes wrong
 // because otherwise, if the thrown error is caught, program execution will continue
 // other function calls will then use the incorrect state
 // SOLVED by setting to false if error.
 
-function setLogToConsole(newLogToConsole) {
+export function setLogToConsole(newLogToConsole) {
   logToConsole = newLogToConsole;
 }
 
-function getResults() {
+export function getResults() {
   return results;
 }
 
-function describe(groupName, callback) {
+export function describe(groupName, callback) {
   if (insideIt) {
     insideIt = false;
     throw new Error(
@@ -54,7 +54,7 @@ function describe(groupName, callback) {
   groupStack.pop();
 }
 
-function it(specName, callback) {
+export function it(specName, callback) {
   if (insideIt) {
     insideIt = false;
     throw new Error(
@@ -90,7 +90,7 @@ function it(specName, callback) {
     if (error instanceof Error) {
       group[specName] = { status: "error", error: error };
     } else {
-      group[specName] = { status: "fail", error: error };
+      group[specName] = { status: "fail", outputs: error };
     }
   }
   if (logToConsole)

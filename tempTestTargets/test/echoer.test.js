@@ -1,107 +1,129 @@
-import asserter from '../../asserter.js';
-import tester from '../../tester.js'; 
+import { equal, throwsError } from '../../asserter.js';
+import { describe, it, setLogToConsole, getResults } from '../../tester.js'; 
 import echoer from '../echoer.js';
 
-tester.describe('testBlockOuter', () => {
-  tester.describe('testBlock', () => {
-    tester.it('should give output x given input x when called', () => {
-      asserter.equal(echoer.echo('t1'), 't1');
-    });
-    tester.it('should fail', () => {
-      asserter.equal(echoer.echo('t1'), 't2');
-    });
-    tester.it('should give output object x given input x when called', () => {
-      asserter.equal(echoer.badStringInput('t1', 'a'), { success:true, output: 't1a' });
-    });
-    tester.it('should return validation issue', () => {
-      // this seems way too clunky
-      asserter.equal(echoer.badStringInput(3, { foo: 'bar' }), {
-        success: false,
-        error: {
-          message: 'Invalid argument type',
-          expected: 'string',
-          received: typeof 3,
-          input: 3
-        }
+
+describe('tester', () => {
+  setLogToConsole(true);
+  describe('testBlockOuter', () => {
+    describe('testBlock', () => {
+      it('should give output x given input x when called', () => {
+        equal(echoer.echo('t1'), 't1');
       });
-      // this is kind of same, but maybe bit better
-      const result = echoer.badStringInput(123);
-      asserter.equal(result.success, false);
-      asserter.equal(result.error.message, 'Invalid argument type');
-      asserter.equal(result.error.expected, 'string');
-      asserter.equal(result.error.received, 'number');
-      asserter.equal(result.error.input, 123);
+      it('should fail', () => {
+        equal(echoer.echo('t1'), 't2');
+      });
+      it('should give output object x given input x when called', () => {
+        equal(echoer.badStringInput('t1', 'a'), { success:true, output: 't1a' });
+      });
+      it('should return validation issue', () => {
+        // this seems way too clunky
+        equal(echoer.badStringInput(3, { foo: 'bar' }), {
+          success: false,
+          error: {
+            message: 'Invalid argument type',
+            expected: 'string',
+            received: typeof 3,
+            input: 3
+          }
+        });
+        // this is kind of same, but maybe bit better
+        const result = echoer.badStringInput(123);
+        equal(result.success, false);
+        equal(result.error.message, 'Invalid argument type');
+        equal(result.error.expected, 'string');
+        equal(result.error.received, 'number');
+        equal(result.error.input, 123);
+      });
+      it('should give error', () => {
+        throwsError(echoer.errFunc, new Error('bad'), 't1');
+      });
     });
-    tester.it('should give error', () => {
-      asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
+    describe('testBlock2', () => {
+      it('2should give output x given input x when called', () => {
+        equal(echoer.echo('t1'), 't1');
+      });
+      it(' ', () => {
+        equal(echoer.echo(), 't2');
+      });
+      it('should fail2', () => {
+        equal(echoer.echo('t1'), 't2');
+      });
+      it('2should give error', () => {
+        throwsError(echoer.errFunc, new Error('bad'), 't1');
+      });
     });
   });
-  tester.describe('testBlock2', () => {
-    tester.it('2should give output x given input x when called', () => {
-      asserter.equal(echoer.echo('t1'), 't1');
+  
+  describe('testBlockOuterB', () => {
+    describe('testBlockB1', () => {
+      it('should give output x given input x when called', () => {
+        equal(echoer.echo({ t1: 't1', t2: { t3: 't3' } }), { t1: 't1', t2: { t3: 't3' } });
+      });
+      it('should fail', () => {
+        equal(echoer.echo({ t1: 't1', t2: { t3: 't5' } }), { t1: 't1', t2: { t3: 't3' } });
+      });
+      it('should fail2', () => {
+        equal(echoer.echo(2), 3);
+      });
+      it('should give error', () => {
+        throwsError(echoer.errFunc, new Error('bad'), 't1');
+      });
     });
-    tester.it(' ', () => {
-      asserter.equal(echoer.echo('t1'), 't2');
+    runTestBlockB2();
+  });
+  
+  function runTestBlockB2() {
+    describe('testBlockB2', () => {
+      it('B2should give output x given input x when called', () => {
+        equal(echoer.echo('t1'), 't1');
+      });
+      it('B2should fail', () => {
+        equal(echoer.echo('t1'), 't2');
+      });
+      it('B2should give error', () => {
+        throwsError(echoer.errFunc, new Error('bad'), 't1');
+      });
     });
-    tester.it('should fail2', () => {
-      asserter.equal(echoer.echo('t1'), 't2');
-    });
-    tester.it('2should give error', () => {
-      asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
+  }
+  
+  describe('testEmptyBlock', () => {
+  });
+  describe('testEmptyIt', () => {
+    it('empty it', () => {
     });
   });
+  setLogToConsole(true);
+
+  console.log('res', JSON.stringify(getResults()));
+  it('runs specs', () => {
+    equal(getResults().passed, 11);
+    equal(getResults().failed, 3);
+  });
+
+  it('handles errors', () => {
+    // assertions testing error handling 
+  });
+
 });
 
-tester.describe('testBlockOuterB', () => {
-  tester.describe('testBlockB1', () => {
-    tester.it('should give output x given input x when called', () => {
-      asserter.equal(echoer.echo('t1'), 't1');
-    });
-    tester.it('should fail', () => {
-      asserter.equal(echoer.echo('t1'), 't2');
-    });
-    tester.it('should give error', () => {
-      asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
-    });
-  });
-  runTestBlockB2();
-});
-
-function runTestBlockB2() {
-  tester.describe('testBlockB2', () => {
-    tester.it('B2should give output x given input x when called', () => {
-      asserter.equal(echoer.echo('t1'), 't1');
-    });
-    tester.it('B2should fail', () => {
-      asserter.equal(echoer.echo('t1'), 't2');
-    });
-    tester.it('B2should give error', () => {
-      asserter.throwsError(echoer.errFunc, new Error('bad'), 't1');
-    });
-  });
-}
-
-tester.describe('testEmptyBlock', () => {
-});
-tester.describe('testEmptyIt', () => {
-  tester.it('empty it', () => {
-  });
-});
+// wonder what will happen if something does unexpectedly break.
+// will need to test.
 
 // try {
-//   tester.it('it without describe', () => {
-//     asserter.equal(echoer.echo('t1'), 't1');
+//   it('it without describe', () => {
+//     equal(echoer.echo('t1'), 't1');
 //   });
 // } catch (error) {
 //   console.log(error)
 // }
 
 // try {
-//   tester.describe('outer describe', () => {
-//     tester.it('it with nested describe', () => {
-//       tester.describe('nested describe inside it', () => {
-//         tester.it('inner it', () => {
-//           asserter.equal(echoer.echo('t1'), 't1');
+//   describe('outer describe', () => {
+//     it('it with nested describe', () => {
+//       describe('nested describe inside it', () => {
+//         it('inner it', () => {
+//           equal(echoer.echo('t1'), 't1');
 //         });
 //       });
 //     });
@@ -110,21 +132,21 @@ tester.describe('testEmptyIt', () => {
 //   console.log(error)
 // }
 
-// tester.describe(23, () => {
+// describe(23, () => {
 // });
 
 
-//tester.describe('no func', 'bad describe arg');
+//describe('no func', 'bad describe arg');
 
-//tester.describe();
-// tester.describe('no function in describe');
+//describe();
+// describe('no function in describe');
 
-// tester.describe('test bad it', () => {
-//    tester.it(23, () => {
+// describe('test bad it', () => {
+//    it(23, () => {
 //    });
   
-//   tester.it('ba', 'bad it arg');
+//   it('ba', 'bad it arg');
   
-//   tester.it();
-//   tester.it('no function in it');
+//   it();
+//   it('no function in it');
 // });

@@ -7,7 +7,8 @@ function logSpecResult(spec, specName, indent = '') {
     console.log(`${indent}${specName}: pass`);
   } else if (spec.status === 'fail') {
     console.log(`${indent}${specName}: fail`);
-    console.log(`${indent}  `, JSON.stringify(spec.error));
+    console.log(`${indent}  `, `Actual: ${JSON.stringify(spec.outputs.actual)}`);
+    console.log(`${indent}  `, `Expect: ${JSON.stringify(spec.outputs.expected)}`);
   } else {
     console.log(`${indent}${specName} -`, spec.error);
   }

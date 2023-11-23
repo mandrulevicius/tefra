@@ -1,17 +1,17 @@
-function equal(value1, value2) {
-  return returnResult(isEqual(value1, value2), value1, value2);
+export function equal(expected, actual) {
+  return returnResult(isEqual(expected, actual), expected, actual);
 }
 
-function equalRefs(ref1, ref2) {
+export function equalRefs(ref1, ref2) {
   return returnResult(ref1 === ref2, ref1, ref2);
 }
 
-function returnResult(pass, value1, value2) {
+function returnResult(pass, expected, actual) {
   if (pass) return true;
-  throw { actual: value1, expected: value2 };
+  throw { actual: expected, expected: actual };
 }
 
-function throwsError(callback, expectedError, ...args) {
+export function throwsError(callback, expectedError, ...args) {
   try {
     callback(...args);
     throw { actual: 'No error', expected: 'Error' };
@@ -21,15 +21,15 @@ function throwsError(callback, expectedError, ...args) {
   }
 }
 
-function isEqual(value1, value2) {
+export function isEqual(expected, actual) {
   // could move most logic to setup, remove branches?
   const PRIMITIVES = ['string', 'number', 'boolean', 'bigint', 'undefined', 'symbol'];
-  if (typeof value1 !== typeof value2) return false;
-  if (value1 === null || value2 === null) return value1 === value2;
+  if (typeof expected !== typeof actual) return false;
+  if (expected === null || actual === null) return expected === actual;
   // null is considered primitive, but typeof is 'object'
-  if (PRIMITIVES.includes(typeof value1)) return value1 === value2;
-  if (typeof value1 === 'function') return value1.toString() === value2.toString();
-  if (typeof value1 === 'object') return areObjectsDeepEqual(value1, value2); // RECURSION!
+  if (PRIMITIVES.includes(typeof expected)) return expected === actual;
+  if (typeof expected === 'function') return expected.toString() === actual.toString();
+  if (typeof expected === 'object') return areObjectsDeepEqual(expected, actual); // RECURSION!
   // if here, something is very wrong and should break?
 }
 // can i avoid two-function recursion by splitting up the function?
