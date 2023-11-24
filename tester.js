@@ -58,19 +58,19 @@ export function clearResults() {
 export function describe(groupName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new structureError(`'describe' function cannot be nested inside 'it' function.`);
+    throw new StructureError(`'describe' function cannot be nested inside 'it' function.`);
   }
   if (!groupName || typeof groupName !== "string") {
-    throw new argumentTypeError('string', typeof groupName);
+    throw new ArgumentTypeError('string', typeof groupName);
   }
   if (!callback || typeof callback !== "function") {
-    throw new structureError(`group must have a function callback`);
+    throw new ArgumentTypeError('function', typeof callback);
   }
   const parentGroup = groupStack[groupStack.length - 1] || results;
   if (parentGroup instanceof Result) {
     for (const key in parentGroup.details) {
       if (groupName === key) {
-        throw new structureError(`'describe(${groupName})' already exists in this group.`);
+        throw new StructureError(`'describe(${groupName})' already exists in this group.`);
       }
     }
   }
@@ -90,20 +90,20 @@ export function describe(groupName, callback) {
 export function it(specName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new structureError(`'it' cannot be nested inside another 'it'.`);
+    throw new StructureError(`'it' cannot be nested inside another 'it'.`);
   }
   if (!specName || typeof specName !== "string") {
-    throw new argumentTypeError('string', typeof specName);
+    throw new ArgumentTypeError('string', typeof specName);
   }
   if (!callback || typeof callback !== "function") {
-    throw new argumentTypeError('function', typeof callback);
+    throw new ArgumentTypeError('function', typeof callback);
   }
   const group = groupStack[groupStack.length - 1];
   if (!group) {
-    throw new structureError(`'it' must have 'describe' as parent.`);
+    throw new StructureError(`'it' must have 'describe' as parent.`);
   }
   if (specName in group.details) {
-    throw new structureError(`'it(${specName})' already exists in this group.`);
+    throw new StructureError(`'it(${specName})' already exists in this group.`);
   }
   insideIt = true;
   group.total += 1;
@@ -112,8 +112,8 @@ export function it(specName, callback) {
     group.details[specName] = { status: "passed" };
     group.passed += 1;
   } catch (error) {
-    if (error instanceof structureError) throw error;
-    if (error instanceof argumentTypeError) throw error;
+    if (error instanceof StructureError) throw error;
+    if (error instanceof ArgumentTypeError) throw error;
     if (error instanceof Error) {
       group.details[specName] = { status: "error", error: error };
       group.errors += 1;
@@ -134,24 +134,26 @@ export function it(specName, callback) {
   insideIt = false;
 }
 
-class structureError extends SyntaxError {
+export class StructureError extends SyntaxError {
   constructor(message) {
     super(`Invalid structure: ${message}`);
-    this.name = 'structureError';
+    this.name = 'StructureError';
   }  
 }
 
-class argumentTypeError extends TypeError {
+export class ArgumentTypeError extends TypeError {
   constructor(expectedType, receivedType) {
     super(`Invalid argument: expected ${expectedType} but received ${receivedType}.`);
-    this.name = 'argumentTypeError';
+    this.name = 'ArgumentTypeError';
     this.expectedType = expectedType;
     this.receivedType = receivedType;
   }
 }
 
 // REMINDER: this is for one file only.
-export default { describe, it, getResults, setLogToConsole, clearResults };
+export default { describe, it, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
+// would like to avoid so many exports. maybe the errors and clear results only needed for internal test suite?
+
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester
 // in fact, even logging to console should be a concern of tester
@@ -183,6 +185,7 @@ export default { ...testerCore, setOutputter };
 */
 
 /*
+// this would be fancy, but would add unnecessary mental overhead.
 function CustomError(message) {
   this.name = 'CustomError';
   this.message = message;

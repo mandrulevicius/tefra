@@ -1,5 +1,5 @@
 import { equal, throwsError } from '../../asserter.js';
-import { describe, it, setLogToConsole, getResults, clearResults } from '../../tester.js'; 
+import { describe, it, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
 import echoer from '../echoer.js';
 
 setLogToConsole(false);
@@ -103,11 +103,9 @@ function runTestBlockB2() {
   });
 }
 
-describe('testEmptyBlock', () => {
-});
+describe('testEmptyBlock', () => {});
 describe('testEmptyIt', () => {
-  it('empty it', () => {
-  });
+  it('empty it', () => {});
 });
 
 setLogToConsole(true);
@@ -133,6 +131,80 @@ try {
 } catch (error) {
   incorrectSpecResults.itWithNestedDescribe = error;
 }
+
+try {
+  describe('outer describe', () => {
+    it('it with nested it', () => {
+      it('inner it', () => {
+        equal(echoer.echo('t1'), 't1');
+      });
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.itWithNestedIt = error;
+}
+
+try {
+  describe(23, () => {});
+} catch (error) {
+  incorrectSpecResults.describeWithNumberName = error;
+}
+
+try {
+  describe('no func', 'bad describe arg');
+} catch (error) {
+  incorrectSpecResults.describeWithBadFunc = error;
+}
+
+try {
+  describe();
+} catch (error) {
+  incorrectSpecResults.describeWithoutArgs = error;
+}
+
+try {
+  describe('no function in describe');
+} catch (error) {
+  incorrectSpecResults.describeWithoutFunc = error;
+}
+
+try {
+  describe('duplicate group name', () => {});
+  describe('duplicate group name', () => {});
+} catch (error) {
+  incorrectSpecResults.duplicateGroupName = error;
+}
+
+describe('test bad its', () => {
+  try {
+    it(23, () => {});
+  } catch (error) {
+    incorrectSpecResults.itWithNumberName = error;
+  }
+  try {
+    it('ba', 'bad it arg');
+  } catch (error) {
+    incorrectSpecResults.itWithBadFunc = error;
+  }
+  try {
+    it();
+  } catch (error) {
+    incorrectSpecResults.itWithoutArgs = error;
+  }
+  try {
+    it('no function in it');
+  } catch (error) {
+    incorrectSpecResults.itWithoutFunc = error;
+  }
+  try {
+    it('duplicate name', () => {});
+    it('duplicate name', () => {});
+  } catch (error) {
+    incorrectSpecResults.duplicateItName = error;
+  }
+});
+
+
 
 const results = getResults();
 clearResults(); // Do I want to leave this in? For now, yes, but would rather test results in a separate file
@@ -172,42 +244,53 @@ describe('tester', () => {
       equal(testBlockOuter3details.testBlock2.details[specName].status, 'error');
     });
   });
+  const results2 = getResults();
+  console.log('results2', results2)
   describe('incorrect specs', () => {
     it("should throw error if 'it' is not nested in 'describe'", () => {
-      equal(incorrectSpecResults.itWithoutDescribe instanceof Error, true);
-      // instanceof is ok, but would be better if had customType
+      equal(incorrectSpecResults.itWithoutDescribe instanceof StructureError, true);
     });
     it("should throw error if 'describe' is nested in 'it'", () => {
-      equal(incorrectSpecResults.itWithNestedDescribe instanceof Error, true);
+      equal(incorrectSpecResults.itWithNestedDescribe instanceof StructureError, true);
+    });
+    it("should throw error if 'it' is nested in 'it'", () => {
+      equal(incorrectSpecResults.itWithNestedIt instanceof StructureError, true);
+    });
+    it("should throw error if 'describe' is given a number as a name", () => {
+      equal(incorrectSpecResults.describeWithNumberName instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'describe' is given a non-function as a callback", () => {
+      equal(incorrectSpecResults.describeWithBadFunc instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'describe' is given no arguments", () => {
+      equal(incorrectSpecResults.describeWithoutArgs instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'describe' is given no callback", () => {
+      equal(incorrectSpecResults.describeWithoutFunc instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'it' is given a number as a name", () => {
+      equal(incorrectSpecResults.itWithNumberName instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'it' is given a non-function as a callback", () => {
+      equal(incorrectSpecResults.itWithBadFunc instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'it' is given no arguments", () => {
+      equal(incorrectSpecResults.itWithoutArgs instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'it' is given no callback", () => {
+      equal(incorrectSpecResults.itWithoutFunc instanceof ArgumentTypeError, true);
+    });
+    it("should throw error if 'it' is given a duplicate name", () => {
+      equal(incorrectSpecResults.duplicateItName instanceof StructureError, true);
+    });
+    it("should throw error if 'describe' is given a duplicate name", () => {
+      equal(incorrectSpecResults.duplicateGroupName instanceof StructureError, true);
     });
   });
 });
 
-const results2 = getResults();
-console.log('results2', results2)
+const results3 = getResults();
+console.log('results3', results3) // why empty?
 
 // wonder what will happen if something does unexpectedly break.
 // will need to test.
-
-
-
-
-
-// describe(23, () => {
-// });
-
-
-//describe('no func', 'bad describe arg');
-
-//describe();
-// describe('no function in describe');
-
-// describe('test bad it', () => {
-//    it(23, () => {
-//    });
-  
-//   it('ba', 'bad it arg');
-  
-//   it();
-//   it('no function in it');
-// });
