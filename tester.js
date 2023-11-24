@@ -21,6 +21,8 @@ function updateParentResults(parent, groupWithResult) {
   // Don't like modifying the parent object directly here, but it is kind of expected anyway.
   // Refactoring everything is not worth it here - would take too much time for minor benefit.
 }
+// Maybe should have just counted file totals - group subtotals don't seem to be that useful.
+// Should have defined the problem better, but it's ok, did not add too much complexity.
 
 const results = new Result();
 const groupStack = [];
@@ -56,28 +58,19 @@ export function clearResults() {
 export function describe(groupName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new Error(
-      `Invalid structure group "${groupName}": 'describe' function cannot be nested inside 'it' function.`
-    );
+    throw new structureError(`'describe' function cannot be nested inside 'it' function.`);
   }
   if (!groupName || typeof groupName !== "string") {
-    throw new Error(
-      `Invalid structure group "${groupName}": group must have a string name`
-      // improve error messages to both say what is wrong, and how to fix it.
-    );
+    throw new argumentTypeError('string', typeof groupName);
   }
   if (!callback || typeof callback !== "function") {
-    throw new Error(
-      `Invalid structure group "${groupName}": group must have a function callback`
-    );
+    throw new structureError(`group must have a function callback`);
   }
   const parentGroup = groupStack[groupStack.length - 1] || results;
   if (parentGroup instanceof Result) {
     for (const key in parentGroup.details) {
       if (groupName === key) {
-        throw new Error(
-          `Invalid structure group "${groupName}": group name already exists`
-        );
+        throw new structureError(`'describe(${groupName})' already exists in this group.`);
       }
     }
   }
@@ -97,30 +90,20 @@ export function describe(groupName, callback) {
 export function it(specName, callback) {
   if (insideIt) {
     insideIt = false;
-    throw new Error(
-      `Invalid structure spec "${specName}": 'it' function cannot be nested inside another 'it' function.`
-    );
+    throw new structureError(`'it' cannot be nested inside another 'it'.`);
   }
   if (!specName || typeof specName !== "string") {
-    throw new Error(
-      `Invalid structure spec "${specName}": spec must have a string name`
-    );
+    throw new argumentTypeError('string', typeof specName);
   }
   if (!callback || typeof callback !== "function") {
-    throw new Error(
-      `Invalid structure spec "${specName}": spec must have a function callback`
-    );
+    throw new argumentTypeError('function', typeof callback);
   }
   const group = groupStack[groupStack.length - 1];
   if (!group) {
-    throw new Error(
-      `Invalid structure spec "${specName}": 'it' function must have 'describe' function as parent.`
-    );
+    throw new structureError(`'it' must have 'describe' as parent.`);
   }
   if (specName in group.details) {
-    throw new Error(
-      `Invalid structure spec "${specName}": spec name already exists`
-    );
+    throw new structureError(`'it(${specName})' already exists in this group.`);
   }
   insideIt = true;
   group.total += 1;
@@ -129,6 +112,8 @@ export function it(specName, callback) {
     group.details[specName] = { status: "passed" };
     group.passed += 1;
   } catch (error) {
+    if (error instanceof structureError) throw error;
+    if (error instanceof argumentTypeError) throw error;
     if (error instanceof Error) {
       group.details[specName] = { status: "error", error: error };
       group.errors += 1;
@@ -147,6 +132,22 @@ export function it(specName, callback) {
       "  ".repeat(groupStack.length)
     );
   insideIt = false;
+}
+
+class structureError extends SyntaxError {
+  constructor(message) {
+    super(`Invalid structure: ${message}`);
+    this.name = 'structureError';
+  }  
+}
+
+class argumentTypeError extends TypeError {
+  constructor(expectedType, receivedType) {
+    super(`Invalid argument: expected ${expectedType} but received ${receivedType}.`);
+    this.name = 'argumentTypeError';
+    this.expectedType = expectedType;
+    this.receivedType = receivedType;
+  }
 }
 
 // REMINDER: this is for one file only.
@@ -181,27 +182,7 @@ export default { ...testerCore, setOutputter };
 
 */
 
-// ERROR HANDLING SOLUTION OPTIONS:
 /*
-class CustomError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'CustomError';
-  }
-}
-
-class ParameterTypeError extends Error {
-  constructor(expectedType, receivedType) {
-    super(`Invalid argument: expected a ${expectedType} but received a ${receivedType}. Please ensure you are passing a ${expectedType} to the function.`);
-    this.name = 'ParameterTypeError';
-  }
-}
-
-if (typeof input !== 'string') {
-  throw new ParameterTypeError('string', typeof input);
-}
-
-
 function CustomError(message) {
   this.name = 'CustomError';
   this.message = message;

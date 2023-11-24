@@ -109,10 +109,34 @@ describe('testEmptyIt', () => {
   it('empty it', () => {
   });
 });
+
 setLogToConsole(true);
+const incorrectSpecResults = {};
+try {
+  it('it without describe', () => {
+    equal(echoer.echo('t1'), 't1');
+  });
+} catch (error) {
+  incorrectSpecResults.itWithoutDescribe = error;
+}
+
+try {
+  describe('outer describe', () => {
+    it('it with nested describe', () => {
+      describe('nested describe inside it', () => {
+        it('inner it', () => {
+          equal(echoer.echo('t1'), 't1');
+        });
+      });
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.itWithNestedDescribe = error;
+}
 
 const results = getResults();
 clearResults(); // Do I want to leave this in? For now, yes, but would rather test results in a separate file
+setLogToConsole(true);
 describe('tester', () => {
   describe('correct specs', () => {
     it('should have status error', () => {
@@ -149,8 +173,12 @@ describe('tester', () => {
     });
   });
   describe('incorrect specs', () => {
-    it('handles errors', () => {
-      // assertions testing error handling 
+    it("should throw error if 'it' is not nested in 'describe'", () => {
+      equal(incorrectSpecResults.itWithoutDescribe instanceof Error, true);
+      // instanceof is ok, but would be better if had customType
+    });
+    it("should throw error if 'describe' is nested in 'it'", () => {
+      equal(incorrectSpecResults.itWithNestedDescribe instanceof Error, true);
     });
   });
 });
@@ -161,27 +189,9 @@ console.log('results2', results2)
 // wonder what will happen if something does unexpectedly break.
 // will need to test.
 
-// try {
-//   it('it without describe', () => {
-//     equal(echoer.echo('t1'), 't1');
-//   });
-// } catch (error) {
-//   console.log(error)
-// }
 
-// try {
-//   describe('outer describe', () => {
-//     it('it with nested describe', () => {
-//       describe('nested describe inside it', () => {
-//         it('inner it', () => {
-//           equal(echoer.echo('t1'), 't1');
-//         });
-//       });
-//     });
-//   });
-// } catch (error) {
-//   console.log(error)
-// }
+
+
 
 // describe(23, () => {
 // });
