@@ -25,7 +25,7 @@ function updateParentResults(parent, groupWithResult) {
 // Should have defined the problem better, but it's ok, did not add too much complexity.
 
 const results = new Result();
-const groupStack = [];
+const groupStack = []; // might also not work with async
 let logToConsole = true;
 let insideIt = false; // might have issues with async, but will solve as we go.
 // also having module-wide internal state means it has to be reset every time something goes wrong
@@ -56,8 +56,13 @@ export function clearResults() {
   groupStack.length = 0;
   insideIt = false;
 }
-
+// the whole file call should be async?
+// each describe should create a new instance of the library?
+// maybe just create a new context.
 export function describe(groupName, callback) {
+  // maybe should not call it callback, but fine for now
+
+
   if (insideIt) {
     insideIt = false;
     throw new StructureError(`'describe' function cannot be nested inside 'it' function.`);
@@ -82,7 +87,74 @@ export function describe(groupName, callback) {
   groupStack.push(group);
   if (logToConsole)
     consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
-  callback();
+
+  console.log('groupName', groupName)
+
+  // bind leading arg to first describe or it found in callback...
+  // dirty, but should work
+  //const callbackString = callback.toString();
+  //console.log('callbackString', callbackString)
+  //const boundCallback = callback.bind(group);
+
+  //const caller = describe.caller.name;
+  // const stack = new Error().stack;
+  // console.log('stack', stack)
+  // const splitStack = stack.split('\n');
+  // console.log('splitStack', splitStack)
+  // const matches = splitStack[3].match(/\s+at\s+(\w+)/)
+  // console.log('matches', matches)
+
+
+  // const caller = stack.split('\n')[2].match(/\s+at\s+(\w+)/)[1]; 
+  // console.log('caller', caller)
+  // this will give me 'describe' at best, but thats enough.
+  // well, it is for checks, but certainly not for async
+  // or is it..
+  // will still log shit out of order if async.
+  // and thats actually the main issue now? how to solve?
+
+
+  // console.log('callback.constructor.name', callback.constructor.name)
+  //console.log('callback', callback)
+  // console.log('callback.constructor', callback.constructor)
+
+  //this.context = groupName;
+  //console.log('this', this.context)
+  // console.log('callback.this', callback.this)
+
+  // function getCallback(callback) {
+  //   return function callback1() {
+  //     const prefix = groupName;
+  //     callback();
+  //   }
+  // }
+
+
+
+  // const namedCallback = getCallback(callback);
+  // console.log('namedCallback', namedCallback);
+
+  // Object.defineProperty(callback, 'name', { value: groupName });
+  // console.log('callback', callback);
+  // console.log('callback.name', callback.name);
+
+  // bind this maybe
+
+  // const boundCallback = callback.bind(describe);
+  // console.log('boundCallback', boundCallback);
+
+  //boundCallback();
+
+  // give callback a name of groupName - basically parent.
+  // inside the next describe or it, check context?
+
+  if (callback.constructor.name === "AsyncFunction") {
+    callback().then(() => {
+      groupStack.pop();
+      updateParentResults(parentGroup, group);
+    }).catch(error => { throw error });
+  } else callback();
+
   groupStack.pop();
   updateParentResults(parentGroup, group);
   //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
@@ -110,7 +182,12 @@ export function it(specName, callback) {
   insideIt = true;
   group.total += 1;
   try {
-    callback();
+    if (callback.constructor.name === "AsyncFunction") {
+      callback().then(() => {
+        group.details[specName] = { status: "passed" };
+        group.passed += 1;
+      }).catch(error => { throw error });
+    } else callback();
     group.details[specName] = { status: "passed" };
     group.passed += 1;
   } catch (error) {

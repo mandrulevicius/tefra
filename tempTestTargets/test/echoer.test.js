@@ -4,7 +4,7 @@ import echoer from '../echoer.js';
 
 setLogToConsole(false);
 describe('testBlockOuter', () => {
-  describe('testBlockInner1', () => {
+  describe('test BlockInner1', () => {
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
@@ -21,6 +21,19 @@ describe('testBlockOuter', () => {
 describe('testBlockOuter2', () => {
 });
 
+describe('testAsync', () => {
+  it('should pass - return same value as argument', async () => {
+    equal(await echoer.asyncFunc('t1'), 't1');
+  });
+  it('should fail', async () => {
+    equal(await echoer.asyncFunc('t1'), 't2');
+  });
+  // it('should catch error', async () => {
+  //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
+  // });
+});
+
+/*
 describe('testBlockOuter3', () => {
   describe('testBlock', () => {
     it('should pass - return same value as argument', () => {
@@ -107,6 +120,8 @@ describe('testEmptyBlock', () => {});
 describe('testEmptyIt', () => {
   it('empty it', () => {});
 });
+
+
 
 
 const incorrectSpecResults = {};
@@ -287,9 +302,6 @@ describe('tester incorrect specs', () => {
     equal(incorrectSpecResults.duplicateGroupName instanceof StructureError, true);
   });
 });
-
+*/
 const results3 = getResults();
 console.log('results3', results3)
-
-// wonder what will happen if something does unexpectedly break.
-// will need to test.
