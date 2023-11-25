@@ -53,6 +53,8 @@ export function clearResults() {
   results.total = 0;
   results.status = undefined;
   results.details = {};
+  groupStack.length = 0;
+  insideIt = false;
 }
 
 export function describe(groupName, callback) {

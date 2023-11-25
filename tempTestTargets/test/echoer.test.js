@@ -108,7 +108,7 @@ describe('testEmptyIt', () => {
   it('empty it', () => {});
 });
 
-setLogToConsole(true);
+
 const incorrectSpecResults = {};
 try {
   it('it without describe', () => {
@@ -207,90 +207,89 @@ describe('test bad its', () => {
 
 
 const results = getResults();
-clearResults(); // Do I want to leave this in? For now, yes, but would rather test results in a separate file
+clearResults();
+// Do I want to leave this in? For now, yes, but would rather test results in a separate file.
+// Obviously would be best to use separate instances of the library.
+// But lets be real, testing a test framework with itself is also probably not ideal.
 setLogToConsole(true);
-describe('tester', () => {
-  describe('correct specs', () => {
-    it('should have status error', () => {
-      equal(results.status, "error");
-    });
-    it('should pass 12 specs', () => {
-      equal(results.passed, 12);
-    });
-    it('should fail 7 specs', () => {
-      equal(results.failed, 7);
-    });
-    it('should catch 1 error in specs', () => {
-      equal(results.errors, 1);
-    });
-    it('should result in a total of 20 specs', () => {
-      equal(results.total, 20);
-    });
-    const testBlockOuter3details = results.details.testBlockOuter3.details;
-    it('should pass test', () => {
-      const specName = 'should pass - return same value as argument';
-      equal(testBlockOuter3details.testBlock.details[specName].status, 'passed');
-    });
-    it('should fail test', () => {
-      const specName = 'should fail';
-      equal(testBlockOuter3details.testBlock.details[specName].status, 'failed');
-    });
-    it('should pass test - catch error', () => {
-      const specName = 'should catch error';
-      equal(testBlockOuter3details.testBlock.details[specName].status, 'passed');
-    });
-    it('should error test', () => {
-      const specName = 'should throw error';
-      equal(testBlockOuter3details.testBlock2.details[specName].status, 'error');
-    });
+describe('tester correct specs', () => {
+  it('should have status error', () => {
+    equal(results.status, "error");
   });
-  const results2 = getResults();
-  console.log('results2', results2)
-  describe('incorrect specs', () => {
-    it("should throw error if 'it' is not nested in 'describe'", () => {
-      equal(incorrectSpecResults.itWithoutDescribe instanceof StructureError, true);
-    });
-    it("should throw error if 'describe' is nested in 'it'", () => {
-      equal(incorrectSpecResults.itWithNestedDescribe instanceof StructureError, true);
-    });
-    it("should throw error if 'it' is nested in 'it'", () => {
-      equal(incorrectSpecResults.itWithNestedIt instanceof StructureError, true);
-    });
-    it("should throw error if 'describe' is given a number as a name", () => {
-      equal(incorrectSpecResults.describeWithNumberName instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'describe' is given a non-function as a callback", () => {
-      equal(incorrectSpecResults.describeWithBadFunc instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'describe' is given no arguments", () => {
-      equal(incorrectSpecResults.describeWithoutArgs instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'describe' is given no callback", () => {
-      equal(incorrectSpecResults.describeWithoutFunc instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'it' is given a number as a name", () => {
-      equal(incorrectSpecResults.itWithNumberName instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'it' is given a non-function as a callback", () => {
-      equal(incorrectSpecResults.itWithBadFunc instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'it' is given no arguments", () => {
-      equal(incorrectSpecResults.itWithoutArgs instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'it' is given no callback", () => {
-      equal(incorrectSpecResults.itWithoutFunc instanceof ArgumentTypeError, true);
-    });
-    it("should throw error if 'it' is given a duplicate name", () => {
-      equal(incorrectSpecResults.duplicateItName instanceof StructureError, true);
-    });
-    it("should throw error if 'describe' is given a duplicate name", () => {
-      equal(incorrectSpecResults.duplicateGroupName instanceof StructureError, true);
-    });
+  it('should pass 12 specs', () => {
+    equal(results.passed, 12);
+  });
+  it('should fail 7 specs', () => {
+    equal(results.failed, 7);
+  });
+  it('should catch 1 error in specs', () => {
+    equal(results.errors, 1);
+  });
+  it('should result in a total of 20 specs', () => {
+    equal(results.total, 20);
+  });
+  const testBlockOuter3details = results.details.testBlockOuter3.details;
+  it('should pass test', () => {
+    const specName = 'should pass - return same value as argument';
+    equal(testBlockOuter3details.testBlock.details[specName].status, 'passed');
+  });
+  it('should fail test', () => {
+    const specName = 'should fail';
+    equal(testBlockOuter3details.testBlock.details[specName].status, 'failed');
+  });
+  it('should pass test - catch error', () => {
+    const specName = 'should catch error';
+    equal(testBlockOuter3details.testBlock.details[specName].status, 'passed');
+  });
+  it('should error test', () => {
+    const specName = 'should throw error';
+    equal(testBlockOuter3details.testBlock2.details[specName].status, 'error');
+  });
+});
+describe('tester incorrect specs', () => {
+  it("should throw error if 'it' is not nested in 'describe'", () => {
+    equal(incorrectSpecResults.itWithoutDescribe instanceof StructureError, true);
+  });
+  it("should throw error if 'describe' is nested in 'it'", () => {
+    equal(incorrectSpecResults.itWithNestedDescribe instanceof StructureError, true);
+  });
+  it("should throw error if 'it' is nested in 'it'", () => {
+    equal(incorrectSpecResults.itWithNestedIt instanceof StructureError, true);
+  });
+  it("should throw error if 'describe' is given a number as a name", () => {
+    equal(incorrectSpecResults.describeWithNumberName instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'describe' is given a non-function as a callback", () => {
+    equal(incorrectSpecResults.describeWithBadFunc instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'describe' is given no arguments", () => {
+    equal(incorrectSpecResults.describeWithoutArgs instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'describe' is given no callback", () => {
+    equal(incorrectSpecResults.describeWithoutFunc instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'it' is given a number as a name", () => {
+    equal(incorrectSpecResults.itWithNumberName instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'it' is given a non-function as a callback", () => {
+    equal(incorrectSpecResults.itWithBadFunc instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'it' is given no arguments", () => {
+    equal(incorrectSpecResults.itWithoutArgs instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'it' is given no callback", () => {
+    equal(incorrectSpecResults.itWithoutFunc instanceof ArgumentTypeError, true);
+  });
+  it("should throw error if 'it' is given a duplicate name", () => {
+    equal(incorrectSpecResults.duplicateItName instanceof StructureError, true);
+  });
+  it("should throw error if 'describe' is given a duplicate name", () => {
+    equal(incorrectSpecResults.duplicateGroupName instanceof StructureError, true);
   });
 });
 
 const results3 = getResults();
-console.log('results3', results3) // why empty?
+console.log('results3', results3)
 
 // wonder what will happen if something does unexpectedly break.
 // will need to test.
