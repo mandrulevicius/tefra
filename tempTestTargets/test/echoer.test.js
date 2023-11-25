@@ -2,6 +2,9 @@ import { equal, throwsError } from '../../asserter.js';
 import { describe, it, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
 import echoer from '../echoer.js';
 
+console.log('describe', describe);
+console.log('describe', describe.toString());
+
 setLogToConsole(false);
 describe('testBlockOuter', () => {
   describe('test BlockInner1', () => {
@@ -21,17 +24,17 @@ describe('testBlockOuter', () => {
 describe('testBlockOuter2', () => {
 });
 
-describe('testAsync', () => {
-  it('should pass - return same value as argument', async () => {
-    equal(await echoer.asyncFunc('t1'), 't1');
-  });
-  it('should fail', async () => {
-    equal(await echoer.asyncFunc('t1'), 't2');
-  });
-  // it('should catch error', async () => {
-  //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
-  // });
-});
+// describe('testAsync', () => {
+//   it('should pass - return same value as argument', async () => {
+//     equal(await echoer.asyncFunc('t1'), 't1');
+//   });
+//   it('should fail', async () => {
+//     equal(await echoer.asyncFunc('t1'), 't2');
+//   });
+//   // it('should catch error', async () => {
+//   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
+//   // });
+// });
 
 /*
 describe('testBlockOuter3', () => {
