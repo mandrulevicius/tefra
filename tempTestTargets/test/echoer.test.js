@@ -1,5 +1,5 @@
 import { equal, throwsError } from '../../asserter.js';
-import { describe, it, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
+import { describe, it, beforeEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
 import echoer from '../echoer.js';
 
 // const sync = run(async () => {
@@ -25,17 +25,26 @@ import echoer from '../echoer.js';
 // console.log('describe', describe);
 // console.log('describe', describe.toString());
 
-function x(){
-  console.log(this);
-}
-x.bind(x)();
+// function x(){
+//   console.log(this);
+// }
+// x.bind(x)();
 
-
-setLogToConsole(false);
+setLogToConsole(true);
 describe('testBlockOuter', () => {
-  //beforeEach()
+  let a = 1;
+  //console.log('a - outer describe', a);
+  beforeEach(() => {
+    a = 0
+    //console.log('ttest', ttest)
+    //console.log('befThis', this)
+    //console.log('a - before each', a);
+  });
   describe('test BlockInner1', () => {
     it('should pass - return same value as argument', () => {
+      //console.log('a - in it', a);
+      a = 't1';
+      //console.log('ač', a);
       equal(echoer.echo('t1'), 't1');
     });
     it('should fail', () => {
@@ -43,6 +52,7 @@ describe('testBlockOuter', () => {
     });
   });
   describe('testBlockInner2', () => {
+    //console.log('a - in second describe', a);
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
@@ -51,23 +61,23 @@ describe('testBlockOuter', () => {
 describe('testBlockOuter2', () => {
 });
 
-describe('FunctestBlockOuter', function () {
-  describe('Functest BlockInner1', function () {
-    it('Funcshould pass - return same value as argument', function () {
-      equal(echoer.echo('t1'), 't1');
-    });
-    it('Funcshould fail', function () {
-      equal(echoer.echo('t1'), 't2');
-    });
-  });
-  describe('FunctestBlockInner2', function () {
-    it('Funcshould pass - return same value as argument', function () {
-      equal(echoer.echo('t1'), 't1');
-    });
-  });
-});
-describe('FunctestBlockOuter2', function () {
-});
+// describe('FunctestBlockOuter', function () {
+//   describe('Functest BlockInner1', function () {
+//     it('Funcshould pass - return same value as argument', function () {
+//       equal(echoer.echo('t1'), 't1');
+//     });
+//     it('Funcshould fail', function () {
+//       equal(echoer.echo('t1'), 't2');
+//     });
+//   });
+//   describe('FunctestBlockInner2', function () {
+//     it('Funcshould pass - return same value as argument', function () {
+//       equal(echoer.echo('t1'), 't1');
+//     });
+//   });
+// });
+// describe('FunctestBlockOuter2', function () {
+// });
 
 // for each callstack, run callbacks.
 

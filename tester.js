@@ -58,6 +58,12 @@ export function clearResults() {
   insideIt = false;
 }
 
+function Callerbacker(groupName, callback) {
+  this.groupName = groupName;
+  this.callback = callback;
+  return (groupName) => { callback(groupName) }; 
+}
+
 // function Describe() {
 //   this.a = 1;
 //   return describe;
@@ -90,6 +96,18 @@ export function describe(groupName, callback) {
   if (!callback || typeof callback !== "function") {
     throw new ArgumentTypeError('function', typeof callback);
   }
+
+  // add param to callback through bind
+  console.log('callback', callback);
+
+  // new Function(arg, arg2, body) MIGHT HAVE NO CHOICE
+
+  // new Describe() ?
+  // const cally = new Callerbacker(groupName, callback)
+  // console.log('cally', cally);
+  // console.log('cally.this', cally.this);
+
+
   const parentGroup = groupStack[groupStack.length - 1] || results;
   if (parentGroup instanceof Result) {
     for (const key in parentGroup.details) {
@@ -122,6 +140,8 @@ export function describe(groupName, callback) {
   //   throw error;
   // });
   callback();
+
+  // just throw the callback out? wont work
 
   //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
   // log file totals when running from test runner
@@ -228,6 +248,23 @@ export function it(specName, callback) {
   //});
 };
 
+export function beforeEach(callback) {
+  if (!callback || typeof callback !== "function") {
+    throw new ArgumentTypeError('function', typeof callback);
+  }
+  //const boundBef = callback.bind(null, 'befEach');
+  //console.log('boundBef', boundBef)
+  // whose beforeEach is this? how to know?
+  // extra first parameter with bind?
+  //console.log('!beforeEach callback', callback);
+  //boundBef();
+  //callback();
+  //beforeCallbacks.push(callback);
+}
+
+// still want a module-level object to shove stuff into?
+// yes, because still need substitute for groupStack
+
 export class StructureError extends SyntaxError {
   constructor(message) {
     super(`Invalid structure: ${message}`);
@@ -245,7 +282,7 @@ export class ArgumentTypeError extends TypeError {
 }
 
 // REMINDER: this is for one file only.
-export default { describe, it, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
+export default { describe, it, beforeEach, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
 // would like to avoid so many exports. maybe the errors and clear results only needed for internal test suite?
 
 // DESIGN:
