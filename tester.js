@@ -25,6 +25,7 @@ function updateParentResults(parent, groupWithResult) {
 // Should have defined the problem better, but it's ok, did not add too much complexity.
 
 const results = new Result();
+//const groupStacks = {};
 const groupStack = []; // might also not work with async
 let logToConsole = true;
 let insideIt = false; // might have issues with async, but will solve as we go.
@@ -57,81 +58,120 @@ export function clearResults() {
   insideIt = false;
 }
 
+// function Describe() {
+//   this.a = 1;
+//   return describe;
+// }
+export function describe(groupName, callback) {
+  // maybe should not call it callback, but fine for now
 
+  // if two args, then it is top-level describe
+  // CAN STILL TRY TO ADD ARG WITH BIND
 
-// Wrapping in Immediately Invoked Function Expression (IIFE) to force synchronous
-// Could do self-invoking generator function, but would still need to wrap to hide .next()
-// PLEASE TEST THESE IN A SIMPLER ENVIRONMENT
+  // each describe creates a new instance of groupstack.
+  // group stack defined here?
+  // still need to pass reference into callback, i think.
 
-export const describe = (() => {
-  const asyncFunc = async (groupName, callback) => {
-    // maybe should not call it callback, but fine for now
-    if (insideIt) {
-      insideIt = false;
-      throw new StructureError(`'describe' function cannot be nested inside 'it' function.`);
-    }
-    if (!groupName || typeof groupName !== "string") {
-      throw new ArgumentTypeError('string', typeof groupName);
-    }
-    if (!callback || typeof callback !== "function") {
-      throw new ArgumentTypeError('function', typeof callback);
-    }
-    const parentGroup = groupStack[groupStack.length - 1] || results;
-    if (parentGroup instanceof Result) {
-      for (const key in parentGroup.details) {
-        if (groupName === key) {
-          throw new StructureError(`'describe(${groupName})' already exists in this group.`);
-        }
+  // actually doing beforeEach might help build understanding.
+
+  // console.log('BEFORE BIND this', this)
+  // console.log('BEFORE BIND callback.this', callback.this)
+  // callback = callback.bind(callback);
+  // console.log('AFTER BIND this', this)
+  // console.log('AFTER BIND callback.this', callback.this)
+
+  if (insideIt) {
+    insideIt = false;
+    throw new StructureError(`'describe' function cannot be nested inside 'it' function.`);
+  }
+  if (!groupName || typeof groupName !== "string") {
+    throw new ArgumentTypeError('string', typeof groupName);
+  }
+  if (!callback || typeof callback !== "function") {
+    throw new ArgumentTypeError('function', typeof callback);
+  }
+  const parentGroup = groupStack[groupStack.length - 1] || results;
+  if (parentGroup instanceof Result) {
+    for (const key in parentGroup.details) {
+      if (groupName === key) {
+        throw new StructureError(`'describe(${groupName})' already exists in this group.`);
       }
     }
-    const group = groupStack.length > 0
-      ? (groupStack[groupStack.length - 1].details[groupName] = new Result())
-      : (results.details[groupName] = new Result());
-    groupStack.push(group);
-    if (logToConsole)
-      consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
-  
-    console.log('groupName', groupName)
-  
-    await callback();
-  
-    groupStack.pop();
-    updateParentResults(parentGroup, group);
-    //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
-    // log file totals when running from test runner
-  };
+  }
+  // console.log(`callback before: ${callback.name}`);
+  // Object.defineProperty(callback, "name", { value: groupName });
+  // console.log(`describe CONTEXT: groupName ${groupName}, parentGroup ${parentGroup.constructor.name}`);
+  // console.log(`callback: ${callback.name}`);
+  // console.log(`callback.constructor: ${callback.constructor.name}`);
 
-  return (groupName, callback) => {
-    return asyncFunc(groupName, callback); 
-  };
-})();
+  const group = groupStack.length > 0
+    ? (groupStack[groupStack.length - 1].details[groupName] = new Result())
+    : (results.details[groupName] = new Result());
+  groupStack.push(group);
+  if (logToConsole)
+    consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
 
-export const it = (() => {
-  const asyncFunc = async (specName, callback) => {
-    if (insideIt) {
-      insideIt = false;
-      throw new StructureError(`'it' cannot be nested inside another 'it'.`);
-    }
-    if (!specName || typeof specName !== "string") {
-      throw new ArgumentTypeError('string', typeof specName);
-    }
-    if (!callback || typeof callback !== "function") {
-      throw new ArgumentTypeError('function', typeof callback);
-    }
-    const group = groupStack[groupStack.length - 1];
-    if (!group) {
-      throw new StructureError(`'it' must have 'describe' as parent.`);
-    }
-    if (specName in group.details) {
-      throw new StructureError(`'it(${specName})' already exists in this group.`);
-    }
-    insideIt = true;
-    group.total += 1;
+  // if (callback.constructor.name !== 'AsyncFunction') {
+  //   callback();
+  //   groupStack.pop();
+  //   updateParentResults(parentGroup, group);
+  // } else runAsync(callback).then(() => {
+  //   groupStack.pop();
+  //   updateParentResults(parentGroup, group);
+  // }).catch((error) => {
+  //   throw error;
+  // });
+  callback();
+
+  //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
+  // log file totals when running from test runner
+};
+
+// export const desc = new Describe();
+// console.log('desc', desc)
+// desc('testt', ()=> { desc('testinner', () => {}) })
+
+// const obj = {
+//   getThisGetter() {
+//     const getter = () => this;
+//     console.log('inside this', this)
+//     return getter;
+//   },
+// };
+
+// const thisGetter = obj.getThisGetter()
+// console.log('this getter', thisGetter);
+// console.log('thisGetter()', thisGetter());
+
+// export const thisGetterContext = thisGetter();
+// console.log('thisGetterContext', thisGetterContext);
+
+export function it(specName, callback) {
+  if (insideIt) {
+    insideIt = false;
+    throw new StructureError(`'it' cannot be nested inside another 'it'.`);
+  }
+  if (!specName || typeof specName !== "string") {
+    throw new ArgumentTypeError('string', typeof specName);
+  }
+  if (!callback || typeof callback !== "function") {
+    throw new ArgumentTypeError('function', typeof callback);
+  }
+  const group = groupStack[groupStack.length - 1];
+  if (!group) {
+    throw new StructureError(`'it' must have 'describe' as parent.`);
+  }
+  if (specName in group.details) {
+    throw new StructureError(`'it(${specName})' already exists in this group.`);
+  }
+  insideIt = true;
+  group.total += 1;
+ // if (callback.constructor.name !== 'AsyncFunction') {
     try {
-      await callback();
+      callback();
       group.details[specName] = { status: "passed" };
       group.passed += 1;
-    } catch (error) {
+    } catch(error) {
       if (error instanceof StructureError) throw error;
       if (error instanceof ArgumentTypeError) throw error;
       if (error instanceof Error) {
@@ -152,12 +192,41 @@ export const it = (() => {
         "  ".repeat(groupStack.length)
       );
     insideIt = false;
-  }
-
-  return (specName, callback) => {
-    return asyncFunc(specName, callback); 
-  };
-})();
+  // } else runAsync(callback).then(() => {
+  //   group.details[specName] = { status: "passed" };
+  //   group.passed += 1;
+  //   if (group.passed === group.total) group.status = "passed";
+  //   if (group.failed > 0) group.status = "failed";
+  //   if (group.errors > 0) group.status = "error";
+  //   if (logToConsole)
+  //     consoleLogger.logSpecResult(
+  //       group.details[specName],
+  //       specName,
+  //       "  ".repeat(groupStack.length)
+  //     );
+  //   insideIt = false;
+  // }).catch((error) => {
+  //   if (error instanceof StructureError) throw error;
+  //   if (error instanceof ArgumentTypeError) throw error;
+  //   if (error instanceof Error) {
+  //     group.details[specName] = { status: "error", error: error };
+  //     group.errors += 1;
+  //   } else {
+  //     group.details[specName] = { status: "failed", output: error };
+  //     group.failed += 1;
+  //   }
+  //   if (group.passed === group.total) group.status = "passed";
+  //   if (group.failed > 0) group.status = "failed";
+  //   if (group.errors > 0) group.status = "error";
+  //   if (logToConsole)
+  //     consoleLogger.logSpecResult(
+  //       group.details[specName],
+  //       specName,
+  //       "  ".repeat(groupStack.length)
+  //     );
+  //   insideIt = false;
+  //});
+};
 
 export class StructureError extends SyntaxError {
   constructor(message) {

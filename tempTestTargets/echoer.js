@@ -35,4 +35,5 @@ async function asyncFunc(input) {
   return new Promise(resolve => setTimeout(() => resolve(input), 1000));
 }
 
+
 export default { echo, badStringInput, errFunc, asyncFunc };

@@ -2,11 +2,38 @@ import { equal, throwsError } from '../../asserter.js';
 import { describe, it, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
 import echoer from '../echoer.js';
 
-console.log('describe', describe);
-console.log('describe', describe.toString());
+// const sync = run(async () => {
+//   return await echoer.asyncFunc();  
+// });
+//console.log('thisGetterContext', thisGetterContext);
+
+// console.log('async', echoer.asyncFunc.constructor);
+// console.log('sync', sync.constructor);
+// const asyncResult = sync('testInput');
+// console.log('asyncResult', asyncResult);
+
+// echoer.syncGen.next().then(result => {
+//   console.log('result', result);
+// }).catch(err => {
+//   console.log('err', err);
+// });
+// console.log('afterasync2');
+
+// const asyncResult3 = await echoer.syncGen.next();
+// console.log('asyncResult3', asyncResult3);
+
+// console.log('describe', describe);
+// console.log('describe', describe.toString());
+
+function x(){
+  console.log(this);
+}
+x.bind(x)();
+
 
 setLogToConsole(false);
 describe('testBlockOuter', () => {
+  //beforeEach()
   describe('test BlockInner1', () => {
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
@@ -23,6 +50,26 @@ describe('testBlockOuter', () => {
 });
 describe('testBlockOuter2', () => {
 });
+
+describe('FunctestBlockOuter', function () {
+  describe('Functest BlockInner1', function () {
+    it('Funcshould pass - return same value as argument', function () {
+      equal(echoer.echo('t1'), 't1');
+    });
+    it('Funcshould fail', function () {
+      equal(echoer.echo('t1'), 't2');
+    });
+  });
+  describe('FunctestBlockInner2', function () {
+    it('Funcshould pass - return same value as argument', function () {
+      equal(echoer.echo('t1'), 't1');
+    });
+  });
+});
+describe('FunctestBlockOuter2', function () {
+});
+
+// for each callstack, run callbacks.
 
 // describe('testAsync', () => {
 //   it('should pass - return same value as argument', async () => {
