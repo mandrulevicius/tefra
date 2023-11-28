@@ -1,50 +1,20 @@
-import { equal, throwsError } from '../../asserter.js';
-import { describe, it, beforeEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../../tester.js'; 
-import echoer from '../echoer.js';
-
-// const sync = run(async () => {
-//   return await echoer.asyncFunc();  
-// });
-//console.log('thisGetterContext', thisGetterContext);
-
-// console.log('async', echoer.asyncFunc.constructor);
-// console.log('sync', sync.constructor);
-// const asyncResult = sync('testInput');
-// console.log('asyncResult', asyncResult);
-
-// echoer.syncGen.next().then(result => {
-//   console.log('result', result);
-// }).catch(err => {
-//   console.log('err', err);
-// });
-// console.log('afterasync2');
-
-// const asyncResult3 = await echoer.syncGen.next();
-// console.log('asyncResult3', asyncResult3);
-
-// console.log('describe', describe);
-// console.log('describe', describe.toString());
-
-// function x(){
-//   console.log(this);
-// }
-// x.bind(x)();
+import { equal, throwsError } from '../asserter.js';
+import { describe, it, beforeEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../tester.js'; 
+import echoer from './dummies/echoer.js';
 
 setLogToConsole(true);
 describe('testBlockOuter', () => {
   let a = 1;
-  //console.log('a - outer describe', a);
+  console.log('a - outer describe', a);
   beforeEach(() => {
     a = 0
-    //console.log('ttest', ttest)
-    //console.log('befThis', this)
-    //console.log('a - before each', a);
+    console.log('a - before each', a);
   });
   describe('test BlockInner1', () => {
     it('should pass - return same value as argument', () => {
-      //console.log('a - in it', a);
+      console.log('a - in it', a);
       a = 't1';
-      //console.log('ač', a);
+      console.log('ač', a);
       equal(echoer.echo('t1'), 't1');
     });
     it('should fail', () => {
@@ -52,7 +22,7 @@ describe('testBlockOuter', () => {
     });
   });
   describe('testBlockInner2', () => {
-    //console.log('a - in second describe', a);
+    console.log('a - in second describe', a);
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
@@ -60,6 +30,10 @@ describe('testBlockOuter', () => {
 });
 describe('testBlockOuter2', () => {
 });
+// formalize these tests for setup and teardown
+
+
+
 
 // describe('FunctestBlockOuter', function () {
 //   describe('Functest BlockInner1', function () {
@@ -82,11 +56,14 @@ describe('testBlockOuter2', () => {
 // for each callstack, run callbacks.
 
 // describe('testAsync', () => {
-//   it('should pass - return same value as argument', async () => {
-//     equal(await echoer.asyncFunc('t1'), 't1');
+//   it('should pass - return same value as argument', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't1');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't1') })
 //   });
-//   it('should fail', async () => {
-//     equal(await echoer.asyncFunc('t1'), 't2');
+//   it('should fail', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't2');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't2') }).catch((error) => {throw error})
+//     // this still results in the equal result not being caught properly
 //   });
 //   // it('should catch error', async () => {
 //   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
