@@ -1,6 +1,7 @@
 // THIS IS TEMPORARY FOR INTERNAL TESTING PURPOSES
 
-import './test/tester.test.js';
+import './testRunner.js';
+//import './test/tester.test.js';
 
 //import './tempTestTargets/test/echoDef.test.js'
 //import './tempTestTargets/test/echoNamed.test.js'

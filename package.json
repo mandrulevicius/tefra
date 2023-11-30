@@ -1,6 +1,6 @@
 {
   "name": "minostestframeworkjs",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "modular test framework",
   "type": "module",
   "main": "index.js",
