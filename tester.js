@@ -68,33 +68,24 @@ export function describe(groupName, callback) {
   if (!callback || typeof callback !== "function") {
     resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
-
-  const parentGroup = groupStack[groupStack.length - 1] || results;
-  if (parentGroup instanceof Result) {
-    for (const key in parentGroup.details) {
-      if (groupName === key) {
-        resetAndThrow(new StructureError(`'describe(${groupName})' already exists in this group.`));
-      }
-    }
-  }
-
-  const group = groupStack.length > 0
-    ? (groupStack[groupStack.length - 1].details[groupName] = new Result())
-    : (results.details[groupName] = new Result());
-  groupStack.push(group);
-  if (logToConsole)
-    consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
-
   if (callback.constructor.name === 'AsyncFunction') {
     resetAndThrow(new AsyncError());
   }
+
+  const parentGroup = groupStack[groupStack.length - 1] || results;
+  if (groupName in parentGroup.details) {
+    resetAndThrow(new StructureError(`'describe(${groupName})' already exists in this group.`));
+  }
+
+  if (logToConsole)
+    consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length));
+
+  groupStack.push(parentGroup.details[groupName] = new Result());
   if (parentGroup.beforeEach) parentGroup.beforeEach();
   callback();
   if (parentGroup.afterEach) parentGroup.afterEach();
-
   groupStack.pop();
-  updateParentResults(parentGroup, group);
-  
+  updateParentResults(parentGroup, parentGroup.details[groupName]);
   //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
   // log file totals when running from test runner
 };
@@ -109,15 +100,15 @@ export function it(specName, callback) {
   if (!callback || typeof callback !== "function") {
     resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
+  }
   const group = groupStack[groupStack.length - 1];
   if (!group) {
     resetAndThrow(new StructureError(`'it' must have 'describe' as parent.`));
   }
   if (specName in group.details) {
     resetAndThrow(new StructureError(`'it(${specName})' already exists in this group.`));
-  }
-  if (callback.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
   }
   inside = 'it';
   try {
@@ -159,6 +150,9 @@ export function beforeEach(callback) {
   if (inside) {
     resetAndThrow(new StructureError(`'beforeEach' cannot be nested inside '${inside}'.`));
   }
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
+  }
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {
     resetAndThrow(new StructureError(`'beforeEach' must have 'describe' as parent.`));
@@ -179,6 +173,9 @@ export function afterEach(callback) {
   }
   if (inside) {
     resetAndThrow(new StructureError(`'afterEach' cannot be nested inside '${inside}'.`));
+  }
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
   }
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {
