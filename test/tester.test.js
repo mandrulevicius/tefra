@@ -1,76 +1,27 @@
 import { equal, throwsError } from '../asserter.js';
-import { describe, it, beforeEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../tester.js'; 
+import { describe, it, beforeEach, afterEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../tester.js'; 
 import echoer from './dummies/echoer.js';
 
 setLogToConsole(true);
-describe('testBlockOuter', () => {
-  let a = 1;
-  console.log('a - outer describe', a);
-  beforeEach(() => {
-    a = 0
-    console.log('a - before each', a);
-  });
-  describe('test BlockInner1', () => {
-    it('should pass - return same value as argument', () => {
-      console.log('a - in it', a);
-      a = 't1';
-      console.log('ač', a);
+describe('FunctestBlockOuter', function () {
+  describe('Functest BlockInner1', function () {
+    it('Funcshould pass - return same value as argument', function () {
       equal(echoer.echo('t1'), 't1');
     });
-    it('should fail', () => {
+    it('Funcshould fail', function () {
       equal(echoer.echo('t1'), 't2');
     });
   });
-  describe('testBlockInner2', () => {
-    console.log('a - in second describe', a);
-    it('should pass - return same value as argument', () => {
+  describe('FunctestBlockInner2', function () {
+    it('Funcshould pass - return same value as argument', function () {
       equal(echoer.echo('t1'), 't1');
     });
   });
 });
-describe('testBlockOuter2', () => {
+
+describe('FunctestBlockOuter2', function () {
 });
-// formalize these tests for setup and teardown
 
-
-
-
-// describe('FunctestBlockOuter', function () {
-//   describe('Functest BlockInner1', function () {
-//     it('Funcshould pass - return same value as argument', function () {
-//       equal(echoer.echo('t1'), 't1');
-//     });
-//     it('Funcshould fail', function () {
-//       equal(echoer.echo('t1'), 't2');
-//     });
-//   });
-//   describe('FunctestBlockInner2', function () {
-//     it('Funcshould pass - return same value as argument', function () {
-//       equal(echoer.echo('t1'), 't1');
-//     });
-//   });
-// });
-// describe('FunctestBlockOuter2', function () {
-// });
-
-// for each callstack, run callbacks.
-
-// describe('testAsync', () => {
-//   it('should pass - return same value as argument', () => {
-//     //equal(await echoer.asyncFunc('t1'), 't1');
-//     echoer.asyncFunc('t1').then((result) => { equal(result, 't1') })
-//   });
-//   it('should fail', () => {
-//     //equal(await echoer.asyncFunc('t1'), 't2');
-//     echoer.asyncFunc('t1').then((result) => { equal(result, 't2') }).catch((error) => {throw error})
-//     // this still results in the equal result not being caught properly
-//   });
-//   // it('should catch error', async () => {
-//   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
-//   // });
-// });
-
-/*
 describe('testBlockOuter3', () => {
   describe('testBlock', () => {
     it('should pass - return same value as argument', () => {
@@ -109,7 +60,7 @@ describe('testBlockOuter3', () => {
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
-    it(' ', () => {
+    it(' ', () => { // TODO CLEANUP
       equal(echoer.echo(), 't2');
     });
     it('should fail', () => {
@@ -158,8 +109,70 @@ describe('testEmptyIt', () => {
   it('empty it', () => {});
 });
 
+describe('setup and teardown', () => {
+  let setup = 1;
+  let teardown = 'tear';
+  beforeEach(() => {
+    setup = 0
+  });
+  afterEach(() => {
+    teardown = null;
+  });
+  describe('SnT inner 1', () => {
+    it('should pass -  setup value reset', () => {
+      equal(echoer.echo(setup), 0);
+      setup = 't1';
+    });
+    it('should pass - teardown value not reset yet', () => {
+      equal(echoer.echo(teardown), 'tear');
+    });
+  });
+  describe('SnT inner 2 for it function', () => {
+    it('should pass - setup value reset', () => {
+      equal(echoer.echo(setup), 0);
+    });
+    it('should pass - teardown value reset', () => {
+      equal(echoer.echo(teardown), null);
+    });
+
+    let setupIt = 1;
+    let teardownIt = 'tear';
+    beforeEach(() => {
+      setupIt = 0
+    });
+    afterEach(() => {
+      teardownIt = null;
+    });
+    it('should pass - teardownIt value not reset yet', () => {
+      equal(echoer.echo(teardownIt), 'tear');
+      setupIt = 2;
+    });
+    it('should pass - setupIt value reset', () => {
+      equal(echoer.echo(setupIt), 0);
+    });
+    it('should pass - teardownIt value reset', () => {
+      equal(echoer.echo(teardownIt), null);
+    });
+  });;
+});
 
 
+// TEST should throw async error
+
+// describe('testAsync', () => {
+//   it('should pass - return same value as argument', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't1');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't1') })
+//   });
+//   it('should fail', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't2');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't2') }).catch((error) => {throw error})
+//     // this still results in the equal result not being caught properly
+//   });
+//   // it('should catch error', async () => {
+//   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
+//   // });
+// });
 
 const incorrectSpecResults = {};
 try {
@@ -169,21 +182,16 @@ try {
 } catch (error) {
   incorrectSpecResults.itWithoutDescribe = error;
 }
-
 try {
   describe('outer describe', () => {
     it('it with nested describe', () => {
       describe('nested describe inside it', () => {
-        it('inner it', () => {
-          equal(echoer.echo('t1'), 't1');
-        });
       });
     });
   });
 } catch (error) {
   incorrectSpecResults.itWithNestedDescribe = error;
 }
-
 try {
   describe('outer describe', () => {
     it('it with nested it', () => {
@@ -201,19 +209,16 @@ try {
 } catch (error) {
   incorrectSpecResults.describeWithNumberName = error;
 }
-
 try {
   describe('no func', 'bad describe arg');
 } catch (error) {
   incorrectSpecResults.describeWithBadFunc = error;
 }
-
 try {
   describe();
 } catch (error) {
   incorrectSpecResults.describeWithoutArgs = error;
 }
-
 try {
   describe('no function in describe');
 } catch (error) {
@@ -256,10 +261,66 @@ describe('test bad its', () => {
   }
 });
 
+try {
+  describe('more than one beforeEach', () => {
+    beforeEach(() => {
+    });
+    beforeEach(() => {
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.moreThanOneBeforeEach = error;
+};
+try {
+  beforeEach(() => {
+  });
+} catch (error) {
+  incorrectSpecResults.topLevelBeforeEach = error;
+};
+try {
+  describe('bad describe - beforeEach in it', () => {
+    it('it with nested beforeEach', () => {
+      beforeEach(() => {
+      });
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.itWithNestedBeforeEach = error;
+};
+try {
+  describe('bad describe - describe in beforeEach', () => {
+    beforeEach(() => {
+      describe('error in describe', () => {
+      });
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.describeInBeforeEach = error;
+};
+
+try {
+  describe('error in describe', () => {
+    echoer.errFunc();
+  });
+} catch (error) {
+  incorrectSpecResults.errorInDescribe = error;
+};
+try {
+  describe('error in beforeEach', () => {
+    beforeEach(() => {
+      echoer.errFunc()
+    });
+    describe('error here', () => {
+    });
+  });
+} catch (error) {
+  incorrectSpecResults.errorInBeforeEach = error;
+};
 
 
 const results = getResults();
 clearResults();
+console.log(results);
 // Do I want to leave this in? For now, yes, but would rather test results in a separate file.
 // Obviously would be best to use separate instances of the library.
 // But lets be real, testing a test framework with itself is also probably not ideal.
@@ -268,8 +329,8 @@ describe('tester correct specs', () => {
   it('should have status error', () => {
     equal(results.status, "error");
   });
-  it('should pass 12 specs', () => {
-    equal(results.passed, 12);
+  it('should pass 19 specs', () => {
+    equal(results.passed, 19);
   });
   it('should fail 7 specs', () => {
     equal(results.failed, 7);
@@ -277,8 +338,8 @@ describe('tester correct specs', () => {
   it('should catch 1 error in specs', () => {
     equal(results.errors, 1);
   });
-  it('should result in a total of 20 specs', () => {
-    equal(results.total, 20);
+  it('should result in a total of 27 specs', () => {
+    equal(results.total, 27);
   });
   const testBlockOuter3details = results.details.testBlockOuter3.details;
   it('should pass test', () => {
@@ -338,7 +399,27 @@ describe('tester incorrect specs', () => {
   it("should throw error if 'describe' is given a duplicate name", () => {
     equal(incorrectSpecResults.duplicateGroupName instanceof StructureError, true);
   });
+  it("should throw error if 'beforeEach' is given more than one", () => {
+    equal(incorrectSpecResults.moreThanOneBeforeEach instanceof StructureError, true);
+  });
+  it("should throw error if 'beforeEach' is given at the top level", () => {
+    equal(incorrectSpecResults.topLevelBeforeEach instanceof StructureError, true);
+  });
+  it("should throw error if 'it' is given a nested beforeEach", () => {
+    equal(incorrectSpecResults.itWithNestedBeforeEach instanceof StructureError, true);
+  });
+  it("should throw error if 'beforeEach' is given a nested describe", () => {
+    equal(incorrectSpecResults.describeInBeforeEach instanceof StructureError, true);
+  });
+
+
+  it("should throw error if 'describe' has an error in it", () => {
+    equal(incorrectSpecResults.errorInDescribe instanceof Error, true);
+  });
+  it("should throw error if 'beforeEach' has an error in it", () => {
+    equal(incorrectSpecResults.errorInBeforeEach instanceof Error, true);
+  });
 });
-*/
+
 const results3 = getResults();
 console.log('results3', results3)

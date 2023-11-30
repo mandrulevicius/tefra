@@ -27,7 +27,7 @@ function updateParentResults(parent, groupWithResult) {
 const results = new Result();
 const groupStack = [];
 let logToConsole = true;
-let insideIt = false;
+let insideIt = false; // TODO refactor by adding adding type to Result, and checking parent type
 // having module-wide internal state means it has to be reset every time something goes wrong
 // because otherwise, if the thrown error is caught, program execution will continue
 // other function calls will then use the incorrect state
@@ -52,25 +52,23 @@ export function clearResults() {
   insideIt = false;
 }
 
-
 export function describe(groupName, callback) {
   // maybe should not call it callback, but fine for now
   if (insideIt) {
-    insideIt = false;
-    throw new StructureError(`'describe' function cannot be nested inside 'it' function.`);
+    resetAndThrow(new StructureError(`'describe' cannot be nested inside 'it'.`));
   }
   if (!groupName || typeof groupName !== "string") {
-    throw new ArgumentTypeError('string', typeof groupName);
+    resetAndThrow(new ArgumentTypeError('string', typeof groupName));
   }
   if (!callback || typeof callback !== "function") {
-    throw new ArgumentTypeError('function', typeof callback);
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
 
   const parentGroup = groupStack[groupStack.length - 1] || results;
   if (parentGroup instanceof Result) {
     for (const key in parentGroup.details) {
       if (groupName === key) {
-        throw new StructureError(`'describe(${groupName})' already exists in this group.`);
+        resetAndThrow(new StructureError(`'describe(${groupName})' already exists in this group.`));
       }
     }
   }
@@ -82,8 +80,12 @@ export function describe(groupName, callback) {
   if (logToConsole)
     consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length - 1));
 
-  if (callback.constructor.name === 'AsyncFunction') throw new AsyncError();
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
+  }
+  if (parentGroup.beforeEach) parentGroup.beforeEach();
   callback();
+  if (parentGroup.afterEach) parentGroup.afterEach();
 
   groupStack.pop();
   updateParentResults(parentGroup, group);
@@ -94,33 +96,34 @@ export function describe(groupName, callback) {
 
 export function it(specName, callback) {
   if (insideIt) {
-    insideIt = false;
-    throw new StructureError(`'it' cannot be nested inside another 'it'.`);
+    resetAndThrow(new StructureError(`'it' cannot be nested inside another 'it'.`));
   }
   if (!specName || typeof specName !== "string") {
-    throw new ArgumentTypeError('string', typeof specName);
+    resetAndThrow(new ArgumentTypeError('string', typeof specName));
   }
   if (!callback || typeof callback !== "function") {
-    throw new ArgumentTypeError('function', typeof callback);
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
   const group = groupStack[groupStack.length - 1];
   if (!group) {
-    throw new StructureError(`'it' must have 'describe' as parent.`);
+    resetAndThrow(new StructureError(`'it' must have 'describe' as parent.`));
   }
   if (specName in group.details) {
-    throw new StructureError(`'it(${specName})' already exists in this group.`);
+    resetAndThrow(new StructureError(`'it(${specName})' already exists in this group.`));
   }
   insideIt = true;
-  group.total += 1;
 
   if (callback.constructor.name === 'AsyncFunction') throw new AsyncError();
   try {
+    if (group.beforeEach) group.beforeEach();
     callback();
+    if (group.afterEach) group.afterEach();
     group.details[specName] = { status: "passed" };
     group.passed += 1;
   } catch(error) {
-    if (error instanceof StructureError) throw error;
-    if (error instanceof ArgumentTypeError) throw error;
+    if (error instanceof StructureError) resetAndThrow(error);
+    if (error instanceof ArgumentTypeError) resetAndThrow(error);
+    if (error instanceof AsyncError) resetAndThrow(error);
     if (error instanceof Error) {
       group.details[specName] = { status: "error", error: error };
       group.errors += 1;
@@ -139,12 +142,43 @@ export function it(specName, callback) {
       "  ".repeat(groupStack.length)
     );
   insideIt = false;
+  group.total += 1;
 };
 
+// can extract common code from these two
 export function beforeEach(callback) {
   if (!callback || typeof callback !== "function") {
-    throw new ArgumentTypeError('function', typeof callback);
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
+  const parentGroup = groupStack[groupStack.length - 1];
+  if (!parentGroup) {
+    resetAndThrow(new StructureError(`'beforeEach' must have 'describe' as parent.`));
+  }
+  if (insideIt) {
+    resetAndThrow(new StructureError(`'beforeEach' cannot be nested inside 'it'.`));
+  }
+  if (parentGroup.beforeEach) {
+    resetAndThrow(new StructureError(`'beforeEach' already exists in this group.`));
+  }
+  
+  parentGroup.beforeEach = callback;
+}
+
+export function afterEach(callback) {
+  if (!callback || typeof callback !== "function") {
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
+  }
+  const parentGroup = groupStack[groupStack.length - 1];
+  if (!parentGroup) {
+    resetAndThrow(new StructureError(`'afterEach' must have 'describe' as parent.`));
+  }
+  if (insideIt) {
+    resetAndThrow(new StructureError(`'afterEach' cannot be nested inside 'it'.`));
+  }
+  if (parentGroup.afterEach) {
+    resetAndThrow(new StructureError(`'afterEach' already exists in this group.`));
+  }
+  parentGroup.afterEach = callback;
 }
 
 export class StructureError extends SyntaxError {
@@ -170,8 +204,14 @@ export class AsyncError extends Error {
   }
 }
 
+function resetAndThrow(error) {
+  insideIt = false;
+  groupStack.length = 0;
+  throw error;
+}
+
 // REMINDER: this is for one file only.
-export default { describe, it, beforeEach, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
+export default { describe, it, beforeEach, afterEach, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
 // would like to avoid so many exports. maybe the errors and clear results only needed for internal test suite?
 
 // DESIGN:
