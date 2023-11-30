@@ -1,6 +1,7 @@
 // THIS IS TEMPORARY FOR INTERNAL TESTING PURPOSES
 
-import './testRunner.js';
+import testRunner from './testRunner.js';
+testRunner.runTests('./test/tester.test.js');
 //import './test/tester.test.js';
 
 //import './tempTestTargets/test/echoDef.test.js'
@@ -14,4 +15,4 @@ import './testRunner.js';
 // THIS IS FOR PACKAGE EXPOSURE
 import asserter from './asserter.js';
 
-export default { asserter };
+export default { asserter, testRunner };

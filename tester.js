@@ -59,7 +59,6 @@ function clearState() {
 export function describe(groupName, callback) {
   // maybe should not call it callback, but fine for now
   if (inside) {
-    console.log("DESCRIBE", groupName, inside);
     resetAndThrow(new StructureError(`'describe' cannot be nested inside '${inside}'.`));
   }
   if (!groupName || typeof groupName !== "string") {

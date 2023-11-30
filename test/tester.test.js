@@ -2,7 +2,7 @@ import { equal, throwsError } from '../asserter.js';
 import { describe, it, beforeEach, afterEach, setLogToConsole, getResults, clearResults, StructureError, ArgumentTypeError } from '../tester.js'; 
 import echoer from './dummies/echoer.js';
 
-setLogToConsole(true);
+setLogToConsole(false);
 describe('FunctestBlockOuter', function () {
   describe('Functest BlockInner1', function () {
     it('Funcshould pass - return same value as argument', function () {
@@ -322,7 +322,6 @@ try {
 
 const results = getResults();
 clearResults();
-console.log(results);
 // Do I want to leave this in? For now, yes, but would rather test results in a separate file.
 // Obviously would be best to use separate instances of the library.
 // But lets be real, testing a test framework with itself is also probably not ideal.
@@ -413,8 +412,6 @@ describe('tester incorrect specs', () => {
   it("should throw error if 'beforeEach' is given a nested describe", () => {
     equal(incorrectSpecResults.describeInBeforeEach instanceof StructureError, true);
   });
-
-
   it("should throw error if 'describe' has an error in it", () => {
     equal(incorrectSpecResults.errorInDescribe instanceof Error, true);
   });
