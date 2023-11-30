@@ -27,7 +27,7 @@ function updateParentResults(parent, groupWithResult) {
 const results = new Result();
 const groupStack = [];
 let logToConsole = true;
-let insideIt = false; // TODO refactor by adding adding type to Result, and checking parent type
+let inside = null; // maybe could refactor by adding adding type to Result, and checking parent type
 // having module-wide internal state means it has to be reset every time something goes wrong
 // because otherwise, if the thrown error is caught, program execution will continue
 // other function calls will then use the incorrect state
@@ -48,14 +48,19 @@ export function clearResults() {
   results.total = 0;
   results.status = undefined;
   results.details = {};
+  clearState();
+}
+
+function clearState() {
+  inside = null;
   groupStack.length = 0;
-  insideIt = false;
 }
 
 export function describe(groupName, callback) {
   // maybe should not call it callback, but fine for now
-  if (insideIt) {
-    resetAndThrow(new StructureError(`'describe' cannot be nested inside 'it'.`));
+  if (inside) {
+    console.log("DESCRIBE", groupName, inside);
+    resetAndThrow(new StructureError(`'describe' cannot be nested inside '${inside}'.`));
   }
   if (!groupName || typeof groupName !== "string") {
     resetAndThrow(new ArgumentTypeError('string', typeof groupName));
@@ -95,8 +100,8 @@ export function describe(groupName, callback) {
 };
 
 export function it(specName, callback) {
-  if (insideIt) {
-    resetAndThrow(new StructureError(`'it' cannot be nested inside another 'it'.`));
+  if (inside) {
+    resetAndThrow(new StructureError(`'it' cannot be nested inside '${inside}'.`));
   }
   if (!specName || typeof specName !== "string") {
     resetAndThrow(new ArgumentTypeError('string', typeof specName));
@@ -111,9 +116,10 @@ export function it(specName, callback) {
   if (specName in group.details) {
     resetAndThrow(new StructureError(`'it(${specName})' already exists in this group.`));
   }
-  insideIt = true;
-
-  if (callback.constructor.name === 'AsyncFunction') throw new AsyncError();
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
+  }
+  inside = 'it';
   try {
     if (group.beforeEach) group.beforeEach();
     callback();
@@ -141,7 +147,7 @@ export function it(specName, callback) {
       specName,
       "  ".repeat(groupStack.length)
     );
-  insideIt = false;
+  inside = null;
   group.total += 1;
 };
 
@@ -150,35 +156,47 @@ export function beforeEach(callback) {
   if (!callback || typeof callback !== "function") {
     resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
+  if (inside) {
+    resetAndThrow(new StructureError(`'beforeEach' cannot be nested inside '${inside}'.`));
+  }
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {
     resetAndThrow(new StructureError(`'beforeEach' must have 'describe' as parent.`));
   }
-  if (insideIt) {
-    resetAndThrow(new StructureError(`'beforeEach' cannot be nested inside 'it'.`));
-  }
   if (parentGroup.beforeEach) {
     resetAndThrow(new StructureError(`'beforeEach' already exists in this group.`));
   }
-  
-  parentGroup.beforeEach = callback;
+  parentGroup.beforeEach = () => {
+    inside = 'beforeEach';
+    callback();
+    inside = null;
+  };
 }
 
 export function afterEach(callback) {
   if (!callback || typeof callback !== "function") {
     resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
+  if (inside) {
+    resetAndThrow(new StructureError(`'afterEach' cannot be nested inside '${inside}'.`));
+  }
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {
     resetAndThrow(new StructureError(`'afterEach' must have 'describe' as parent.`));
   }
-  if (insideIt) {
-    resetAndThrow(new StructureError(`'afterEach' cannot be nested inside 'it'.`));
-  }
   if (parentGroup.afterEach) {
     resetAndThrow(new StructureError(`'afterEach' already exists in this group.`));
   }
-  parentGroup.afterEach = callback;
+  parentGroup.afterEach = () => {
+    inside = 'afterEach';
+    callback();
+    inside = null;
+  };
+}
+
+function resetAndThrow(error) {
+  clearState();
+  throw error;
 }
 
 export class StructureError extends SyntaxError {
@@ -202,12 +220,6 @@ export class AsyncError extends Error {
     super('Asynchronous code is not supported in this version. Please use testerAsync for that.');
     this.name = 'AsyncError';
   }
-}
-
-function resetAndThrow(error) {
-  insideIt = false;
-  groupStack.length = 0;
-  throw error;
 }
 
 // REMINDER: this is for one file only.

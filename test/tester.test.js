@@ -293,6 +293,8 @@ try {
       describe('error in describe', () => {
       });
     });
+    describe('beforeEach callback only runs if there is describe or it in same level', () => {
+    });
   });
 } catch (error) {
   incorrectSpecResults.describeInBeforeEach = error;
