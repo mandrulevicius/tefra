@@ -56,21 +56,28 @@ function clearState() {
   groupStack.length = 0;
 }
 
-export function describe(groupName, callback) {
-  // maybe should not call it callback, but fine for now
+function checkForErrors(functionName, groupName, callback) {
   if (inside) {
-    resetAndThrow(new StructureError(`'describe' cannot be nested inside '${inside}'.`));
-  }
-  if (!groupName || typeof groupName !== "string") {
-    resetAndThrow(new ArgumentTypeError('string', typeof groupName));
-  }
-  if (!callback || typeof callback !== "function") {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
+    resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${inside}'.`));
   }
   if (callback.constructor.name === 'AsyncFunction') {
     resetAndThrow(new AsyncError());
   }
+  if (!callback || typeof callback !== "function") {
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
+  }
+  console.log('functionName', functionName)
+  if (['describe', 'it'].includes(functionName)) {
+    console.log('TRUE') // work in progress
+    if (!groupName || typeof groupName !== "string") {
+      resetAndThrow(new ArgumentTypeError('string', typeof groupName));
+    }
+  }
+}
 
+export function describe(groupName, callback) {
+  // maybe should not call it callback, but fine for now
+  checkForErrors('describe', groupName, callback);
   const parentGroup = groupStack[groupStack.length - 1] || results;
   if (groupName in parentGroup.details) {
     resetAndThrow(new StructureError(`'describe(${groupName})' already exists in this group.`));
@@ -143,48 +150,32 @@ export function it(specName, callback) {
 
 // can extract common code from these two
 export function beforeEach(callback) {
-  if (!callback || typeof callback !== "function") {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
-  }
-  if (inside) {
-    resetAndThrow(new StructureError(`'beforeEach' cannot be nested inside '${inside}'.`));
-  }
-  if (callback.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
-  }
-  const parentGroup = groupStack[groupStack.length - 1];
-  if (!parentGroup) {
-    resetAndThrow(new StructureError(`'beforeEach' must have 'describe' as parent.`));
-  }
-  if (parentGroup.beforeEach) {
-    resetAndThrow(new StructureError(`'beforeEach' already exists in this group.`));
-  }
-  parentGroup.beforeEach = () => {
-    inside = 'beforeEach';
-    callback();
-    inside = null;
-  };
+  onEach('beforeEach', callback);
 }
 
 export function afterEach(callback) {
+  onEach('afterEach', callback);
+}
+
+function onEach(name, callback) {
   if (!callback || typeof callback !== "function") {
     resetAndThrow(new ArgumentTypeError('function', typeof callback));
   }
   if (inside) {
-    resetAndThrow(new StructureError(`'afterEach' cannot be nested inside '${inside}'.`));
+    resetAndThrow(new StructureError(`'${name}' cannot be nested inside '${inside}'.`));
   }
   if (callback.constructor.name === 'AsyncFunction') {
     resetAndThrow(new AsyncError());
   }
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {
-    resetAndThrow(new StructureError(`'afterEach' must have 'describe' as parent.`));
+    resetAndThrow(new StructureError(`'${name}' must have 'describe' as parent.`));
   }
-  if (parentGroup.afterEach) {
-    resetAndThrow(new StructureError(`'afterEach' already exists in this group.`));
+  if (parentGroup[name]) {
+    resetAndThrow(new StructureError(`'${name}' already exists in this group.`));
   }
-  parentGroup.afterEach = () => {
-    inside = 'afterEach';
+  parentGroup[name] = () => {
+    inside = name;
     callback();
     inside = null;
   };
