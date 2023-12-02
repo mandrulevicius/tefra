@@ -56,10 +56,9 @@ function clearState() {
   groupStack.length = 0;
 }
 
-export function describe(groupName, callback) {
-  // maybe should not call it callback, but fine for now
+export function describe(groupName, groupFunction) {
   checkForName(groupName);
-  checkForGenericErrors(describe.name, callback);
+  checkForGenericErrors(describe.name, groupFunction);
   const parentGroup = groupStack[groupStack.length - 1] || results;
   // if results, then handle top level describe
   checkForDuplicates(describe.name, groupName, parentGroup.details);
@@ -69,7 +68,7 @@ export function describe(groupName, callback) {
 
   groupStack.push(parentGroup.details[groupName] = new Result());
   if (parentGroup.beforeEach) parentGroup.beforeEach();
-  callback();
+  groupFunction();
   if (parentGroup.afterEach) parentGroup.afterEach();
   groupStack.pop();
   updateParentResults(parentGroup, parentGroup.details[groupName]);
@@ -77,13 +76,13 @@ export function describe(groupName, callback) {
   // log file totals when running from test runner
 };
 
-export function it(specName, callback) {
+export function it(specName, specFunction) {
   checkForName(specName);
-  checkForGenericErrors(it.name, callback);
+  checkForGenericErrors(it.name, specFunction);
   const group = getParentGroup(it.name);
   checkForDuplicates(it.name, specName, group.details);
   inside = it.name;
-  const result = runTest(group, callback);
+  const result = testSpec(group, specFunction);
   group.details[specName] = result;
   group[result.status] += 1;
   group.status = determineGroupStatus(group);
@@ -99,18 +98,29 @@ export function it(specName, callback) {
   group.total += 1;
 };
 
-export function beforeEach(callback) {
-  onEach(beforeEach.name, callback);
+export function beforeEach(setupFunction) {
+  onEach(beforeEach.name, setupFunction);
 }
 
-export function afterEach(callback) {
-  onEach(afterEach.name, callback);
+export function afterEach(teardownFunction) {
+  onEach(afterEach.name, teardownFunction);
 }
 
-function runTest(group, callback) {
+function onEach(name, func) {
+  checkForGenericErrors(name, func);
+  const parentGroup = getParentGroup(name);
+  checkForDuplicates(name, undefined, parentGroup);
+  parentGroup[name] = () => {
+    inside = name;
+    func();
+    inside = null;
+  };
+}
+
+function testSpec(group, specFunction) {
   try {
     if (group.beforeEach) group.beforeEach();
-    callback();
+    specFunction();
     if (group.afterEach) group.afterEach();
     return { status: 'passed' };
   } catch(error) {
@@ -129,17 +139,6 @@ function determineGroupStatus(group) {
   return 'pending'; // this is not really a status, but it is used for logging, maybe
 }
 
-function onEach(name, callback) {
-  checkForGenericErrors(name, callback);
-  const parentGroup = getParentGroup(name);
-  checkForDuplicates(name, undefined, parentGroup);
-  parentGroup[name] = () => {
-    inside = name;
-    callback();
-    inside = null;
-  };
-}
-
 // will want to move these to a separate file, together with splitting the test file
 function checkForName(name) {
   if (!name || typeof name !== 'string') {
@@ -147,14 +146,14 @@ function checkForName(name) {
   }
 }
 
-function checkForGenericErrors(functionName, callback) {
+function checkForGenericErrors(functionName, func) {
   if (inside) {
     resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${inside}'.`));
   }
-  if (!callback || typeof callback !== 'function') {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
+  if (!func || typeof func !== 'function') {
+    resetAndThrow(new ArgumentTypeError('function', typeof func));
   }
-  if (callback.constructor.name === 'AsyncFunction') {
+  if (func.constructor.name === 'AsyncFunction') {
     resetAndThrow(new AsyncError());
   }
 }
