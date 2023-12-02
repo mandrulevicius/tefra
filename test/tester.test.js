@@ -337,7 +337,7 @@ describe('tester correct specs', () => {
     equal(results.failed, 7);
   });
   it('should catch 1 error in specs', () => {
-    equal(results.errors, 1);
+    equal(results.error, 1);
   });
   it('should result in a total of 27 specs', () => {
     equal(results.total, 27);

@@ -1,10 +1,10 @@
 import consoleLogger from './consoleLogger.js';
 
-function Result(status, passed = 0, failed = 0, errors = 0, total = 0, details = {}) {
+function Result(status, passed = 0, failed = 0, error = 0, total = 0, details = {}) {
   this.status = status;
   this.passed = passed;
   this.failed = failed;
-  this.errors = errors;
+  this.error = error;
   this.total = total;
   this.details = details;
   // If I really want to have proper internal derivate values, will have to make it into a class
@@ -13,11 +13,11 @@ function Result(status, passed = 0, failed = 0, errors = 0, total = 0, details =
 function updateParentResults(parent, groupWithResult) {
   parent.passed += groupWithResult.passed;
   parent.failed += groupWithResult.failed;
-  parent.errors += groupWithResult.errors;
+  parent.error += groupWithResult.error;
   parent.total += groupWithResult.total;
-  if (parent.passed === parent.total) parent.status = "pass";
-  if (parent.failed > 0) parent.status = "fail";
-  if (parent.errors > 0) parent.status = "error";
+  if (parent.passed === parent.total) parent.status = 'pass';
+  if (parent.failed > 0) parent.status = 'fail';
+  if (parent.error > 0) parent.status = 'error';
   // Don't like modifying the parent object directly here, but it is kind of expected anyway.
   // Refactoring everything is not worth it here - would take too much time for minor benefit.
 }
@@ -44,7 +44,7 @@ export function getResults() {
 export function clearResults() {
   results.passed = 0;
   results.failed = 0;
-  results.errors = 0;
+  results.error = 0;
   results.total = 0;
   results.status = undefined;
   results.details = {};
@@ -56,35 +56,16 @@ function clearState() {
   groupStack.length = 0;
 }
 
-function checkForErrors(functionName, groupName, callback) {
-  if (inside) {
-    resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${inside}'.`));
-  }
-  if (callback.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
-  }
-  if (!callback || typeof callback !== "function") {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
-  }
-  console.log('functionName', functionName)
-  if (['describe', 'it'].includes(functionName)) {
-    console.log('TRUE') // work in progress
-    if (!groupName || typeof groupName !== "string") {
-      resetAndThrow(new ArgumentTypeError('string', typeof groupName));
-    }
-  }
-}
-
 export function describe(groupName, callback) {
   // maybe should not call it callback, but fine for now
-  checkForErrors('describe', groupName, callback);
+  checkForName(groupName);
+  checkForGenericErrors(describe.name, callback);
   const parentGroup = groupStack[groupStack.length - 1] || results;
-  if (groupName in parentGroup.details) {
-    resetAndThrow(new StructureError(`'describe(${groupName})' already exists in this group.`));
-  }
+  // if results, then handle top level describe
+  checkForDuplicates(describe.name, groupName, parentGroup.details);
 
   if (logToConsole)
-    consoleLogger.logGroupName(groupName, "  ".repeat(groupStack.length));
+    consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length));
 
   groupStack.push(parentGroup.details[groupName] = new Result());
   if (parentGroup.beforeEach) parentGroup.beforeEach();
@@ -97,88 +78,103 @@ export function describe(groupName, callback) {
 };
 
 export function it(specName, callback) {
-  if (inside) {
-    resetAndThrow(new StructureError(`'it' cannot be nested inside '${inside}'.`));
-  }
-  if (!specName || typeof specName !== "string") {
-    resetAndThrow(new ArgumentTypeError('string', typeof specName));
-  }
-  if (!callback || typeof callback !== "function") {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
-  }
-  if (callback.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
-  }
-  const group = groupStack[groupStack.length - 1];
-  if (!group) {
-    resetAndThrow(new StructureError(`'it' must have 'describe' as parent.`));
-  }
-  if (specName in group.details) {
-    resetAndThrow(new StructureError(`'it(${specName})' already exists in this group.`));
-  }
-  inside = 'it';
-  try {
-    if (group.beforeEach) group.beforeEach();
-    callback();
-    if (group.afterEach) group.afterEach();
-    group.details[specName] = { status: "passed" };
-    group.passed += 1;
-  } catch(error) {
-    if (error instanceof StructureError) resetAndThrow(error);
-    if (error instanceof ArgumentTypeError) resetAndThrow(error);
-    if (error instanceof AsyncError) resetAndThrow(error);
-    if (error instanceof Error) {
-      group.details[specName] = { status: "error", error: error };
-      group.errors += 1;
-    } else {
-      group.details[specName] = { status: "failed", output: error };
-      group.failed += 1;
-    }
-  }
-  if (group.passed === group.total) group.status = "passed";
-  if (group.failed > 0) group.status = "failed";
-  if (group.errors > 0) group.status = "error";
+  checkForName(specName);
+  checkForGenericErrors(it.name, callback);
+  const group = getParentGroup(it.name);
+  checkForDuplicates(it.name, specName, group.details);
+  inside = it.name;
+  const result = runTest(group, callback);
+  group.details[specName] = result;
+  group[result.status] += 1;
+  group.status = determineGroupStatus(group);
+
   if (logToConsole)
     consoleLogger.logSpecResult(
       group.details[specName],
       specName,
-      "  ".repeat(groupStack.length)
+      '  '.repeat(groupStack.length)
     );
+
   inside = null;
   group.total += 1;
 };
 
-// can extract common code from these two
 export function beforeEach(callback) {
-  onEach('beforeEach', callback);
+  onEach(beforeEach.name, callback);
 }
 
 export function afterEach(callback) {
-  onEach('afterEach', callback);
+  onEach(afterEach.name, callback);
+}
+
+function runTest(group, callback) {
+  try {
+    if (group.beforeEach) group.beforeEach();
+    callback();
+    if (group.afterEach) group.afterEach();
+    return { status: 'passed' };
+  } catch(error) {
+    if (error instanceof StructureError) resetAndThrow(error);
+    if (error instanceof ArgumentTypeError) resetAndThrow(error);
+    if (error instanceof AsyncError) resetAndThrow(error);
+    if (error instanceof Error) return { status: 'error', error: error };
+    return { status: 'failed', output: error };
+  }
+}
+
+function determineGroupStatus(group) {
+  if (group.error > 0) return 'error';
+  if (group.failed > 0) return 'failed';
+  if (group.passed === group.total) return 'passed';
+  return 'pending'; // this is not really a status, but it is used for logging, maybe
 }
 
 function onEach(name, callback) {
-  if (!callback || typeof callback !== "function") {
-    resetAndThrow(new ArgumentTypeError('function', typeof callback));
-  }
-  if (inside) {
-    resetAndThrow(new StructureError(`'${name}' cannot be nested inside '${inside}'.`));
-  }
-  if (callback.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
-  }
-  const parentGroup = groupStack[groupStack.length - 1];
-  if (!parentGroup) {
-    resetAndThrow(new StructureError(`'${name}' must have 'describe' as parent.`));
-  }
-  if (parentGroup[name]) {
-    resetAndThrow(new StructureError(`'${name}' already exists in this group.`));
-  }
+  checkForGenericErrors(name, callback);
+  const parentGroup = getParentGroup(name);
+  checkForDuplicates(name, undefined, parentGroup);
   parentGroup[name] = () => {
     inside = name;
     callback();
     inside = null;
   };
+}
+
+// will want to move these to a separate file, together with splitting the test file
+function checkForName(name) {
+  if (!name || typeof name !== 'string') {
+    resetAndThrow(new ArgumentTypeError('string', typeof name));
+  }
+}
+
+function checkForGenericErrors(functionName, callback) {
+  if (inside) {
+    resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${inside}'.`));
+  }
+  if (!callback || typeof callback !== 'function') {
+    resetAndThrow(new ArgumentTypeError('function', typeof callback));
+  }
+  if (callback.constructor.name === 'AsyncFunction') {
+    resetAndThrow(new AsyncError());
+  }
+}
+
+function getParentGroup(functionName) {
+  const parentGroup = groupStack[groupStack.length - 1];
+  if (!parentGroup) {
+    resetAndThrow(new StructureError(`'${functionName}' must have 'describe' as parent.`));
+  }
+  return parentGroup;
+}
+
+function checkForDuplicates(functionName, groupName = '', groupDetails) {
+  const errorMessage = `'${functionName}(${groupName})' already exists in this group.`;
+  if (!groupName && functionName in groupDetails) {
+    resetAndThrow(new StructureError(errorMessage));
+  }
+  if (groupName in groupDetails) {
+    resetAndThrow(new StructureError(errorMessage));
+  }
 }
 
 function resetAndThrow(error) {
