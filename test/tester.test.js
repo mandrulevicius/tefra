@@ -421,4 +421,4 @@ describe('tester incorrect specs', () => {
 });
 
 const results3 = getResults();
-console.log('results3', results3)
+//console.log('results3', results3)

@@ -1,30 +1,9 @@
+import globalBuilder from './globalBuilder.js';
+import Result from './resultBuilder.js';
 import consoleLogger from './consoleLogger.js';
 
-function Result(status, passed = 0, failed = 0, error = 0, total = 0, details = {}) {
-  this.status = status;
-  this.passed = passed;
-  this.failed = failed;
-  this.error = error;
-  this.total = total;
-  this.details = details;
-  // If I really want to have proper internal derivate values, will have to make it into a class
-}
-
-function updateParentResults(parent, groupWithResult) {
-  parent.passed += groupWithResult.passed;
-  parent.failed += groupWithResult.failed;
-  parent.error += groupWithResult.error;
-  parent.total += groupWithResult.total;
-  if (parent.passed === parent.total) parent.status = 'pass';
-  if (parent.failed > 0) parent.status = 'fail';
-  if (parent.error > 0) parent.status = 'error';
-  // Don't like modifying the parent object directly here, but it is kind of expected anyway.
-  // Refactoring everything is not worth it here - would take too much time for minor benefit.
-}
-// Maybe should have just counted file totals - group subtotals don't seem to be that useful.
-// Should have defined the problem better, but it's ok, did not add too much complexity.
-
-const results = new Result();
+const globalTester = globalBuilder.getGlobalTester();
+const results = globalTester.getCurrentFileResults();
 const groupStack = [];
 let logToConsole = true;
 let inside = null; // maybe could refactor by adding adding type to Result, and checking parent type
@@ -49,6 +28,7 @@ export function clearResults() {
   results.status = undefined;
   results.details = {};
   clearState();
+  // should not need to clear results
 }
 
 function clearState() {
@@ -60,20 +40,20 @@ export function describe(groupName, groupFunction) {
   checkForName(groupName);
   checkForGenericErrors(describe.name, groupFunction);
   const parentGroup = groupStack[groupStack.length - 1] || results;
-  // if results, then handle top level describe
   checkForDuplicates(describe.name, groupName, parentGroup.details);
 
   if (logToConsole)
     consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length));
 
-  groupStack.push(parentGroup.details[groupName] = new Result());
+  const currentGroup = new Result();
+  parentGroup.details[groupName] = currentGroup;
+  groupStack.push(currentGroup);
   if (parentGroup.beforeEach) parentGroup.beforeEach();
   groupFunction();
   if (parentGroup.afterEach) parentGroup.afterEach();
   groupStack.pop();
-  updateParentResults(parentGroup, parentGroup.details[groupName]);
-  //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
-  // log file totals when running from test runner
+  parentGroup.updateResults(currentGroup);
+  if (groupStack.length === 0) globalTester.updateTotalResults();
 };
 
 export function it(specName, specFunction) {
@@ -82,10 +62,11 @@ export function it(specName, specFunction) {
   const group = getParentGroup(it.name);
   checkForDuplicates(it.name, specName, group.details);
   inside = it.name;
-  const result = testSpec(group, specFunction);
-  group.details[specName] = result;
-  group[result.status] += 1;
-  group.status = determineGroupStatus(group);
+  const specResult = testSpec(group, specFunction);
+  group.details[specName] = specResult;
+  group[specResult.status] += 1;
+  group.updateStatus();
+  //group.status = determineGroupStatus(group);
 
   if (logToConsole)
     consoleLogger.logSpecResult(
@@ -130,13 +111,6 @@ function testSpec(group, specFunction) {
     if (error instanceof Error) return { status: 'error', error: error };
     return { status: 'failed', output: error };
   }
-}
-
-function determineGroupStatus(group) {
-  if (group.error > 0) return 'error';
-  if (group.failed > 0) return 'failed';
-  if (group.passed === group.total) return 'passed';
-  return 'pending'; // this is not really a status, but it is used for logging, maybe
 }
 
 // will want to move these to a separate file, together with splitting the test file
