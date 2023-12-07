@@ -2,8 +2,9 @@ import { existsSync, readdirSync, lstatSync, statSync } from 'fs';
 // lstatSync and statSync difference is symbolicLinks.
 // figure out if relevant.
 import { join } from 'path';
-import { buildGlobal } from './globalBuilder.js';
+import { buildGlobal } from './globaler.js';
 import consoleLogger from './consoleLogger.js';
+import tester from './tester.js';
 
 // import tester or directly access global?
 // first do what is more simple, will refactor later if necessary.

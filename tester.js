@@ -1,8 +1,28 @@
-import globalBuilder from './globalBuilder.js';
+import globaler from './globaler.js';
 import Result from './resultBuilder.js';
 import consoleLogger from './consoleLogger.js';
 
-const globalTester = globalBuilder.getGlobalTester();
+// class Tester {
+//   #globalTester;
+//   #results;
+//   #groupStack;
+//   #logToConsole;
+//   #inside;
+
+//   constructor() {
+//     this.#globalTester = globaler.getGlobalTester();
+//     this.#results = this.#globalTester.getCurrentFileResults();
+//     this.#groupStack = [];
+//     this.#logToConsole = true;
+//     this.#inside = null;
+//   }
+
+//   setLogToConsole(newLogToConsole) {
+//     this.#logToConsole = newLogToConsole;
+//   }
+// }
+
+const globalTester = globaler.getGlobalTester();
 const results = globalTester.getCurrentFileResults();
 const groupStack = [];
 let logToConsole = true;
@@ -18,17 +38,6 @@ export function setLogToConsole(newLogToConsole) {
 
 export function getResults() {
   return JSON.parse(JSON.stringify(results));
-}
-
-export function clearResults() {
-  results.passed = 0;
-  results.failed = 0;
-  results.error = 0;
-  results.total = 0;
-  results.status = undefined;
-  results.details = {};
-  clearState();
-  // should not need to clear results
 }
 
 function clearState() {
@@ -66,7 +75,6 @@ export function it(specName, specFunction) {
   group.details[specName] = specResult;
   group[specResult.status] += 1;
   group.updateStatus();
-  //group.status = determineGroupStatus(group);
 
   if (logToConsole)
     consoleLogger.logSpecResult(
@@ -179,7 +187,7 @@ export class AsyncError extends Error {
 }
 
 // REMINDER: this is for one file only.
-export default { describe, it, beforeEach, afterEach, getResults, setLogToConsole, clearResults, StructureError, ArgumentTypeError };
+export default { describe, it, beforeEach, afterEach, getResults, setLogToConsole, StructureError, ArgumentTypeError };
 // would like to avoid so many exports. maybe the errors and clear results only needed for internal test suite?
 
 // DESIGN:

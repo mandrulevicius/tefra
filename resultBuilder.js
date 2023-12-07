@@ -6,7 +6,7 @@ class Result {
     this.error = error;
     this.total = total;
     this.details = details;
-    // TODO make private
+    // TODO make private, access only through setters and getters
     // later add parent, maybe name
   }
 
