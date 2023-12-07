@@ -1,194 +1,149 @@
 import globaler from './globaler.js';
 import Result from './resultBuilder.js';
 import consoleLogger from './consoleLogger.js';
+import { ArgumentTypeError, StructureError, AsyncError } from './errors.js';
 
-// class Tester {
-//   #globalTester;
-//   #results;
-//   #groupStack;
-//   #logToConsole;
-//   #inside;
+class Tester {
+  #globalTester;
+  #results;
+  #logToConsole;
+  #groupStack;
+  #inside;
 
-//   constructor() {
-//     this.#globalTester = globaler.getGlobalTester();
-//     this.#results = this.#globalTester.getCurrentFileResults();
-//     this.#groupStack = [];
-//     this.#logToConsole = true;
-//     this.#inside = null;
-//   }
-
-//   setLogToConsole(newLogToConsole) {
-//     this.#logToConsole = newLogToConsole;
-//   }
-// }
-
-const globalTester = globaler.getGlobalTester();
-const results = globalTester.getCurrentFileResults();
-const groupStack = [];
-let logToConsole = true;
-let inside = null; // maybe could refactor by adding adding type to Result, and checking parent type
-// having module-wide internal state means it has to be reset every time something goes wrong
-// because otherwise, if the thrown error is caught, program execution will continue
-// other function calls will then use the incorrect state
-// SOLVED by setting to false if error.
-
-export function setLogToConsole(newLogToConsole) {
-  logToConsole = newLogToConsole;
-}
-
-export function getResults() {
-  return JSON.parse(JSON.stringify(results));
-}
-
-function clearState() {
-  inside = null;
-  groupStack.length = 0;
-}
-
-export function describe(groupName, groupFunction) {
-  checkForName(groupName);
-  checkForGenericErrors(describe.name, groupFunction);
-  const parentGroup = groupStack[groupStack.length - 1] || results;
-  checkForDuplicates(describe.name, groupName, parentGroup.details);
-
-  if (logToConsole)
-    consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length));
-
-  const currentGroup = new Result();
-  parentGroup.details[groupName] = currentGroup;
-  groupStack.push(currentGroup);
-  if (parentGroup.beforeEach) parentGroup.beforeEach();
-  groupFunction();
-  if (parentGroup.afterEach) parentGroup.afterEach();
-  groupStack.pop();
-  parentGroup.updateResults(currentGroup);
-  if (groupStack.length === 0) globalTester.updateTotalResults();
-};
-
-export function it(specName, specFunction) {
-  checkForName(specName);
-  checkForGenericErrors(it.name, specFunction);
-  const group = getParentGroup(it.name);
-  checkForDuplicates(it.name, specName, group.details);
-  inside = it.name;
-  const specResult = testSpec(group, specFunction);
-  group.details[specName] = specResult;
-  group[specResult.status] += 1;
-  group.updateStatus();
-
-  if (logToConsole)
-    consoleLogger.logSpecResult(
-      group.details[specName],
-      specName,
-      '  '.repeat(groupStack.length)
-    );
-
-  inside = null;
-  group.total += 1;
-};
-
-export function beforeEach(setupFunction) {
-  onEach(beforeEach.name, setupFunction);
-}
-
-export function afterEach(teardownFunction) {
-  onEach(afterEach.name, teardownFunction);
-}
-
-function onEach(name, func) {
-  checkForGenericErrors(name, func);
-  const parentGroup = getParentGroup(name);
-  checkForDuplicates(name, undefined, parentGroup);
-  parentGroup[name] = () => {
-    inside = name;
-    func();
-    inside = null;
-  };
-}
-
-function testSpec(group, specFunction) {
-  try {
-    if (group.beforeEach) group.beforeEach();
-    specFunction();
-    if (group.afterEach) group.afterEach();
-    return { status: 'passed' };
-  } catch(error) {
-    if (error instanceof StructureError) resetAndThrow(error);
-    if (error instanceof ArgumentTypeError) resetAndThrow(error);
-    if (error instanceof AsyncError) resetAndThrow(error);
-    if (error instanceof Error) return { status: 'error', error: error };
-    return { status: 'failed', output: error };
-  }
-}
-
-// will want to move these to a separate file, together with splitting the test file
-function checkForName(name) {
-  if (!name || typeof name !== 'string') {
-    resetAndThrow(new ArgumentTypeError('string', typeof name));
-  }
-}
-
-function checkForGenericErrors(functionName, func) {
-  if (inside) {
-    resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${inside}'.`));
-  }
-  if (!func || typeof func !== 'function') {
-    resetAndThrow(new ArgumentTypeError('function', typeof func));
-  }
-  if (func.constructor.name === 'AsyncFunction') {
-    resetAndThrow(new AsyncError());
-  }
-}
-
-function getParentGroup(functionName) {
-  const parentGroup = groupStack[groupStack.length - 1];
-  if (!parentGroup) {
-    resetAndThrow(new StructureError(`'${functionName}' must have 'describe' as parent.`));
-  }
-  return parentGroup;
-}
-
-function checkForDuplicates(functionName, groupName = '', groupDetails) {
-  const errorMessage = `'${functionName}(${groupName})' already exists in this group.`;
-  if (!groupName && functionName in groupDetails) {
-    resetAndThrow(new StructureError(errorMessage));
-  }
-  if (groupName in groupDetails) {
-    resetAndThrow(new StructureError(errorMessage));
-  }
-}
-
-function resetAndThrow(error) {
-  clearState();
-  throw error;
-}
-
-export class StructureError extends SyntaxError {
-  constructor(message) {
-    super(`Invalid structure: ${message}`);
-    this.name = 'StructureError';
-  }
-}
-
-export class ArgumentTypeError extends TypeError {
-  constructor(expectedType, receivedType) {
-    super(`Invalid argument: expected ${expectedType} but received ${receivedType}.`);
-    this.name = 'ArgumentTypeError';
-    this.expectedType = expectedType;
-    this.receivedType = receivedType;
-  }
-}
-
-export class AsyncError extends Error {
   constructor() {
-    super('Asynchronous code is not supported in this version. Please use testerAsync for that.');
-    this.name = 'AsyncError';
+    this.#globalTester = globaler.getGlobalTester();
+    this.#results = this.#globalTester.getCurrentFileResults();
+    this.#logToConsole = true;
+    this.#groupStack = [];
+    this.#inside = null;
+  }
+
+  setLogToConsole(newLogToConsole) {
+    this.#logToConsole = newLogToConsole;
+  }
+
+  getResults() {
+    return JSON.parse(JSON.stringify(this.#results));
+  }
+
+  describe(groupName, groupFunction) {
+    this.#checkForName(groupName);
+    this.#checkForGenericErrors(describe.name, groupFunction);
+    const parentGroup = this.#groupStack[this.#groupStack.length - 1] || this.#results;
+    this.#checkForDuplicates(describe.name, groupName, parentGroup.details);
+  
+    if (this.#logToConsole)
+      consoleLogger.logGroupName(groupName, '  '.repeat(this.#groupStack.length));
+  
+    const currentGroup = new Result();
+    parentGroup.details[groupName] = currentGroup;
+    this.#groupStack.push(currentGroup);
+    if (parentGroup.beforeEach) parentGroup.beforeEach();
+    groupFunction();
+    if (parentGroup.afterEach) parentGroup.afterEach();
+    this.#groupStack.pop();
+    parentGroup.updateResults(currentGroup);
+    if (groupStack.length === 0) this.#globalTester.updateTotalResults();
+  }
+
+  it(specName, specFunction) {
+    this.#checkForName(specName);
+    this.#checkForGenericErrors(it.name, specFunction);
+    const group = this.#getParentGroup(it.name);
+    this.#checkForDuplicates(it.name, specName, group.details);
+    this.#inside = it.name;
+    const specResult = this.#testSpec(group, specFunction);
+    group.details[specName] = specResult;
+    group[specResult.status] += 1;
+    group.updateStatus();
+  
+    if (this.#logToConsole)
+      consoleLogger.logSpecResult(
+        group.details[specName],
+        specName,
+        '  '.repeat(this.#groupStack.length)
+      );
+  
+    this.#inside = null;
+    group.total += 1;
+  };
+
+  beforeEach(setupFunction) {
+    this.#onEach(beforeEach.name, setupFunction);
+  }
+  afterEach(teardownFunction) {
+    this.#onEach(afterEach.name, teardownFunction);
+  }
+  #onEach(name, func) {
+    this.#checkForGenericErrors(name, func);
+    const parentGroup = this.#getParentGroup(name);
+    this.#checkForDuplicates(name, undefined, parentGroup);
+    parentGroup[name] = () => {
+      this.#inside = name; // will this work? should because arrow func dont create context
+      func();
+      this.#inside = null;
+    };
+  }
+
+  #testSpec(group, specFunction) {
+    try {
+      if (group.beforeEach) group.beforeEach();
+      specFunction();
+      if (group.afterEach) group.afterEach();
+      return { status: 'passed' };
+    } catch(error) {
+      if (error instanceof StructureError) throw error;
+      if (error instanceof ArgumentTypeError) throw error;
+      if (error instanceof AsyncError) throw error;
+      if (error instanceof Error) return { status: 'error', error: error };
+      return { status: 'failed', output: error };
+    }
+  }
+
+  #checkForName(name) {
+    if (!name || typeof name !== 'string') {
+      this.#resetAndThrow(new ArgumentTypeError('string', typeof name));
+    }
+  }
+  
+  #checkForGenericErrors(functionName, func) {
+    if (this.#inside) {
+      this.#resetAndThrow(new StructureError(`'${functionName}' cannot be nested inside '${this.#inside}'.`));
+    }
+    if (!func || typeof func !== 'function') {
+      this.#resetAndThrow(new ArgumentTypeError('function', typeof func));
+    }
+    if (func.constructor.name === 'AsyncFunction') {
+      this.#resetAndThrow(new AsyncError());
+    }
+  }
+  
+  #getParentGroup(functionName) {
+    const parentGroup = this.#groupStack[this.#groupStack.length - 1];
+    if (!parentGroup) {
+      this.#resetAndThrow(new StructureError(`'${functionName}' must have 'describe' as parent.`));
+    }
+    return parentGroup;
+  }
+  
+  #checkForDuplicates(functionName, groupName = '', groupDetails) {
+    const errorMessage = `'${functionName}(${groupName})' already exists in this group.`;
+    if (!groupName && functionName in groupDetails) {
+      this.#resetAndThrow(new StructureError(errorMessage));
+    }
+    if (groupName in groupDetails) {
+      this.#resetAndThrow(new StructureError(errorMessage));
+    }
+  }
+  
+  #resetAndThrow(error) {
+    this.states.inside = null;
+    this.states.groupStack.length = 0;
+    throw error;
   }
 }
 
-// REMINDER: this is for one file only.
-export default { describe, it, beforeEach, afterEach, getResults, setLogToConsole, StructureError, ArgumentTypeError };
-// would like to avoid so many exports. maybe the errors and clear results only needed for internal test suite?
+export default new Tester();
 
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester

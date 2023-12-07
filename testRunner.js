@@ -4,7 +4,6 @@ import { existsSync, readdirSync, lstatSync, statSync } from 'fs';
 import { join } from 'path';
 import { buildGlobal } from './globaler.js';
 import consoleLogger from './consoleLogger.js';
-import tester from './tester.js';
 
 // import tester or directly access global?
 // first do what is more simple, will refactor later if necessary.

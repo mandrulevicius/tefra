@@ -1,5 +1,6 @@
 import { equal } from '../asserter.js';
-import { describe, it, StructureError, ArgumentTypeError } from '../tester.js'; 
+import { describe, it } from '../tester.js';
+import { StructureError, ArgumentTypeError, AsyncError } from '../errors.js';
 import echoerResults from './dummies/echoerTest.js';
 import incorrectSyntaxResults from './dummies/badSyntax.js';
 
