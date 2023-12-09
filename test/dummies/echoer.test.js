@@ -1,5 +1,4 @@
 import { equal, throwsError } from '../../asserter.js';
-import { describe, it, beforeEach, afterEach, setLogToConsole, getResults } from '../../tester.js'; 
 import echoer from './echoer.js';
 
 setLogToConsole(false);
@@ -172,5 +171,3 @@ describe('setup and teardown', () => {
 //   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
 //   // });
 // });
-
-export default getResults();

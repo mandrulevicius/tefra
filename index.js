@@ -1,7 +1,8 @@
 // THIS IS TEMPORARY FOR INTERNAL TESTING PURPOSES
 
 import testRunner from './testRunner.js';
-testRunner.runTests('./test/tester.test.js');
+testRunner.runTests('./test/echoer.test.js'); // SHOULD OUTPUT ERROR IF NO FILE FOUND
+testRunner.runTests('./test/dummies/echoer.test.js');
 //import './test/tester.test.js';
 
 //import './tempTestTargets/test/echoDef.test.js'

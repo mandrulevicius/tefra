@@ -1,6 +1,6 @@
 import { equal } from '../../asserter.js';
-import { describe, it, beforeEach } from '../../tester.js'; 
 
+setLogToConsole(false);
 const incorrectSyntaxResults = {};
 try {
   it('it without describe', () => {

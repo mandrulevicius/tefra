@@ -1,13 +1,21 @@
 import { equal } from '../asserter.js';
-import { describe, it } from '../tester.js';
 import { StructureError, ArgumentTypeError, AsyncError } from '../errors.js';
-import echoerResults from './dummies/echoerTest.js';
-import incorrectSyntaxResults from './dummies/badSyntax.js';
+//import echoerResults from './dummies/echoerTest.js';
+//import incorrectSyntaxResults from './dummies/badSyntax.js';
 
+// NEW TESTER HERE
+// for (const testFile of jsFiles) {
+//   // really want to add them to queue rather than run right now
+//   tester.initFileTest(testFile);
+//   await import('./' + testFile);
+// }
+// const results = tester.getResults();
+
+setLogToConsole(true);
 // this would all be a lot easier if i could make instances of tester.js
-console.log('echoerResults', echoerResults);
-console.log('incorrectSyntaxResults', incorrectSyntaxResults);
-console.log('globals', global.tester) // why this empty?
+//console.log('echoerResults', echoerResults);
+//console.log('incorrectSyntaxResults', incorrectSyntaxResults);
+//console.log('globals', global.tester) // why this empty?
 describe('tester correct specs', () => {
   it('should have status error', () => {
     equal(echoerResults.status, "error");

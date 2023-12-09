@@ -2,14 +2,13 @@ import { existsSync, readdirSync, lstatSync, statSync } from 'fs';
 // lstatSync and statSync difference is symbolicLinks.
 // figure out if relevant.
 import { join } from 'path';
-import { buildGlobal } from './globaler.js';
+import tester from './tester.js';
 import consoleLogger from './consoleLogger.js';
 
 // import tester or directly access global?
 // first do what is more simple, will refactor later if necessary.
 
 async function runTests(targetPath = './', excludedDirs = []) {
-  const globalTester = buildGlobal();
   const defaultExcludedDirs = ['node_modules', '.git'];
   const jsFiles = getJsFiles(`${targetPath}`, defaultExcludedDirs.concat(excludedDirs));
   
@@ -18,14 +17,15 @@ async function runTests(targetPath = './', excludedDirs = []) {
   if (jsFiles.length === 0) return { pass: null, error: `No valid files found in path '${targetPath}'` };
   // TODO cleanup hardcoded error text, use better system for input exceptions
   for (const testFile of jsFiles) {
-    globalTester.setCurrentFile(testFile);
+    // really want to add them to queue rather than run right now
+    tester.initFileTest(testFile);
     await import('./' + testFile);
-    //global.tester.addResults(testFile);
+    tester.updateResults();
   }
+  const results = tester.getResults();
   //const results = globalTester.run(); // async?
-  //console.log('Total results', results);
-  console.log('Total results', globalTester.getResults());
-  consoleLogger.logTotals(globalTester.getResults());
+  console.log('Total results', results);
+  consoleLogger.logTotals(results);
 }
 
 function getJsFiles(targetPath, excludedDirs) {

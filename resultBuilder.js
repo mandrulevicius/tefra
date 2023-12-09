@@ -10,7 +10,7 @@ class Result {
     // later add parent, maybe name
   }
 
-  updateResults(child) {
+  update(child) {
     this.passed += child.passed;
     this.failed += child.failed;
     this.error += child.error;
