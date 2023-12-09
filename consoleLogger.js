@@ -14,14 +14,16 @@ function logSpecResult(spec, specName, indent = '') {
   }
 }
 
-function logTotals(totals) {
-  console.log(`Status: ${totals.status}`);
-  console.log(`Passed: ${totals.passed}`);
-  console.log(`Failed: ${totals.failed}`);
-  console.log(`Total: ${totals.total}`);
+function logResults(results) {
+  console.log(``);
+  console.log(`Status: ${results.status}`);
+  console.log(`  Passed: ${results.passed}`);
+  console.log(`  Failed: ${results.failed}`);
+  console.log(`  Error: ${results.error}`);
+  console.log(`  Total: ${results.total}`);
 }
 
-export default { logGroupName, logSpecResult, logTotals };
+export default { logGroupName, logSpecResult, logResults };
 
 // TODO use or delete after multiple file implementation is done
 // POSSIBLY NEEDED CODE

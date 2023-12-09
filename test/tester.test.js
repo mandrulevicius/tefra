@@ -1,21 +1,28 @@
 import { equal } from '../asserter.js';
 import { StructureError, ArgumentTypeError, AsyncError } from '../errors.js';
-//import echoerResults from './dummies/echoerTest.js';
+import tester from '../tester.js';
 //import incorrectSyntaxResults from './dummies/badSyntax.js';
 
-// NEW TESTER HERE
-// for (const testFile of jsFiles) {
-//   // really want to add them to queue rather than run right now
-//   tester.initFileTest(testFile);
-//   await import('./' + testFile);
-// }
-// const results = tester.getResults();
+const echoerResults = await runEchoerTest('./dummies/echoerTest.js');
+const incorrectSyntaxResults = await runBadSyntaxTest('./dummies/badSyntaxTest.js');
+tester.initFileTest('./tester.test.js');
+
+async function runEchoerTest(testFile) {
+  tester.initFileTest(testFile);
+  await import(testFile);
+  const results = tester.getResults().details[testFile];
+  tester.clearResults();
+  return results;
+}
+
+async function runBadSyntaxTest(testFile) {
+  tester.initFileTest(testFile);
+  const results = await import(testFile);
+  tester.clearResults();
+  return results.default;
+}
 
 setLogToConsole(true);
-// this would all be a lot easier if i could make instances of tester.js
-//console.log('echoerResults', echoerResults);
-//console.log('incorrectSyntaxResults', incorrectSyntaxResults);
-//console.log('globals', global.tester) // why this empty?
 describe('tester correct specs', () => {
   it('should have status error', () => {
     equal(echoerResults.status, "error");

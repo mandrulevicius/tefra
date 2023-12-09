@@ -12,20 +12,22 @@ async function runTests(targetPath = './', excludedDirs = []) {
   const defaultExcludedDirs = ['node_modules', '.git'];
   const jsFiles = getJsFiles(`${targetPath}`, defaultExcludedDirs.concat(excludedDirs));
   
-  // this is due to bad input by user
-  if (!jsFiles) return { pass: null, error: `No file or directory with path '${targetPath}'` };
-  if (jsFiles.length === 0) return { pass: null, error: `No valid files found in path '${targetPath}'` };
-  // TODO cleanup hardcoded error text, use better system for input exceptions
+  if (!jsFiles) throw new Error(`No file or directory with path '${targetPath}'`);
+  if (jsFiles.length === 0) throw new Error(`No valid files found in path '${targetPath}'`);
+
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now
     tester.initFileTest(testFile);
-    await import('./' + testFile);
+    console.log('Testing file:', testFile);
+    await import(testFile);
     tester.updateResults();
+    // log file totals
   }
   const results = tester.getResults();
+  tester.clearResults();
   //const results = globalTester.run(); // async?
-  console.log('Total results', results);
-  consoleLogger.logTotals(results);
+  consoleLogger.logResults(results);
+  return results;
 }
 
 function getJsFiles(targetPath, excludedDirs) {

@@ -2,12 +2,11 @@ import Result from './resultBuilder.js';
 import consoleLogger from './consoleLogger.js';
 import { ArgumentTypeError, StructureError, AsyncError } from './errors.js';
 
-const results = new Result();
+let results = new Result();
 let logToConsole = true;
 const groupStack = [];
 let inside = null;
 let currentFile = null;
-
 
 function initFileTest(fileName) {
   clearState();
@@ -16,9 +15,8 @@ function initFileTest(fileName) {
 }
 
 function clearState() {
-  inside = null;
   groupStack.length = 0;
-  currentFile = null;
+  inside = null;
 }
 
 function updateResults() {
@@ -27,6 +25,10 @@ function updateResults() {
 
 function getResults() {
   return JSON.parse(JSON.stringify(results));
+}
+
+function clearResults() {
+  results = new Result();
 }
 
 function setLogToConsole(newLogToConsole) {
@@ -153,7 +155,7 @@ global.beforeEach = beforeEach;
 global.afterEach = afterEach;
 global.setLogToConsole = setLogToConsole; // should prob remove this
 
-export default { initFileTest, updateResults, getResults };
+export default { initFileTest, updateResults, getResults, clearResults };
 
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester

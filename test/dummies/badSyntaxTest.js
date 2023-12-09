@@ -146,4 +146,21 @@ try {
   incorrectSyntaxResults.errorInBeforeEach = error;
 };
 
+// TEST should throw async error
+
+// describe('testAsync', () => {
+//   it('should pass - return same value as argument', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't1');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't1') })
+//   });
+//   it('should fail', () => {
+//     //equal(await echoer.asyncFunc('t1'), 't2');
+//     echoer.asyncFunc('t1').then((result) => { equal(result, 't2') }).catch((error) => {throw error})
+//     // this still results in the equal result not being caught properly
+//   });
+//   // it('should catch error', async () => {
+//   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
+//   // });
+// });
+
 export default incorrectSyntaxResults;

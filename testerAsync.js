@@ -178,7 +178,7 @@ export function describe(groupName, callback, timeout) {
 
   // just throw the callback out? wont work
 
-  //if (groupStack.length === 0 && logToConsole) consoleLogger.logTotals(results);
+  //if (groupStack.length === 0 && logToConsole) consoleLogger.logResults(results);
   // log file totals when running from test runner
 };
 
