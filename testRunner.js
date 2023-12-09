@@ -2,11 +2,13 @@ import { existsSync, readdirSync, lstatSync, statSync } from 'fs';
 // lstatSync and statSync difference is symbolicLinks.
 // figure out if relevant.
 import { join } from 'path';
+// THESE ARE NOT LIKE THE OTHERS - logical split
+import './asserter.js';
 import tester from './tester.js';
+// THIS ARE NOT LIKE THE OTHERS? - maybe logical split
 import consoleLogger from './consoleLogger.js';
 
-// import tester or directly access global?
-// first do what is more simple, will refactor later if necessary.
+// if any tests fail, maybe should throw results afterwards? (for pipelines)
 
 async function runTests(targetPath = './', excludedDirs = []) {
   const defaultExcludedDirs = ['node_modules', '.git'];
@@ -23,7 +25,7 @@ async function runTests(targetPath = './', excludedDirs = []) {
     tester.updateResults();
     // log file totals
   }
-  const results = tester.getResults();
+  const results = getResults();
   tester.clearResults();
   //const results = globalTester.run(); // async?
   consoleLogger.logResults(results);

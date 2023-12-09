@@ -1,4 +1,3 @@
-import { equal, throwsError } from '../../asserter.js';
 import echoer from './echoer.js';
 
 setLogToConsole(false);

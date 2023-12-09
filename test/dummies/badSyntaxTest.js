@@ -1,5 +1,3 @@
-import { equal } from '../../asserter.js';
-
 setLogToConsole(false);
 const incorrectSyntaxResults = {};
 try {
@@ -146,7 +144,7 @@ try {
   incorrectSyntaxResults.errorInBeforeEach = error;
 };
 
-// TEST should throw async error
+// TEST should throw async error - maybe wont even need if end result will support async
 
 // describe('testAsync', () => {
 //   it('should pass - return same value as argument', () => {

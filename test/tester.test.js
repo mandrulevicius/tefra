@@ -1,4 +1,3 @@
-import { equal } from '../asserter.js';
 import { StructureError, ArgumentTypeError, AsyncError } from '../errors.js';
 import tester from '../tester.js';
 //import incorrectSyntaxResults from './dummies/badSyntax.js';
@@ -10,7 +9,7 @@ tester.initFileTest('./tester.test.js');
 async function runEchoerTest(testFile) {
   tester.initFileTest(testFile);
   await import(testFile);
-  const results = tester.getResults().details[testFile];
+  const results = getResults().details[testFile];
   tester.clearResults();
   return results;
 }

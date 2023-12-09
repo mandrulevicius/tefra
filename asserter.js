@@ -1,8 +1,8 @@
-export function equal(expected, actual) {
+function equal(expected, actual) {
   return returnResult(isEqual(expected, actual), expected, actual);
 }
 
-export function equalRefs(ref1, ref2) {
+function equalRefs(ref1, ref2) {
   return returnResult(ref1 === ref2, ref1, ref2);
 }
 
@@ -11,7 +11,7 @@ function returnResult(pass, expected, actual) {
   throw { actual: expected, expected: actual };
 }
 
-export function throwsError(callback, expectedError, ...args) {
+function throwsError(callback, expectedError, ...args) {
   try {
     callback(...args);
     throw { actual: 'No error', expected: 'Error' };
@@ -21,7 +21,7 @@ export function throwsError(callback, expectedError, ...args) {
   }
 }
 
-export function isEqual(expected, actual) {
+function isEqual(expected, actual) {
   // could move most logic to setup, remove branches?
   const PRIMITIVES = ['string', 'number', 'boolean', 'bigint', 'undefined', 'symbol'];
   if (typeof expected !== typeof actual) return false;
@@ -47,5 +47,15 @@ function areObjectsDeepEqual(object1, object2) {
 
 // anonymous functions are equal if their contents are equal.
 // named functions are equal if their names AND contents are equal.
+
+function attachGlobal(func) {
+  if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
+  global[func.name] = func;
+}
+
+attachGlobal(equal);
+attachGlobal(equalRefs);
+attachGlobal(throwsError);
+attachGlobal(isEqual);
 
 export default { equal, equalRefs, throwsError, isEqual };

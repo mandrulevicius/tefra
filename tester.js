@@ -8,6 +8,13 @@ const groupStack = [];
 let inside = null;
 let currentFile = null;
 
+// LATER - NOW NOT SURE WHAT STRUCTURE WOULD BE BETTER
+// should think about how to restructure this. 
+// this cares too much about files.
+// tester should just test and produce result.
+// testRunner should just run files and collect results.
+// testRunner should clear results after each file?
+
 function initFileTest(fileName) {
   clearState();
   currentFile = fileName;
@@ -149,13 +156,19 @@ function resetAndThrow(error) {
   throw error;
 }
 
-global.describe = describe;
-global.it = it;
-global.beforeEach = beforeEach;
-global.afterEach = afterEach;
-global.setLogToConsole = setLogToConsole; // should prob remove this
+function attachGlobal(func) {
+  if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
+  global[func.name] = func;
+}
 
-export default { initFileTest, updateResults, getResults, clearResults };
+attachGlobal(describe);
+attachGlobal(it);
+attachGlobal(beforeEach);
+attachGlobal(afterEach);
+attachGlobal(setLogToConsole);
+attachGlobal(getResults);
+
+export default { initFileTest, updateResults, clearResults };
 
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester
