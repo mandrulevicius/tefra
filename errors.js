@@ -7,7 +7,7 @@ export class StructureError extends SyntaxError {
 
 export class ArgumentTypeError extends TypeError {
   constructor(expectedType, receivedType) {
-    super(`Invalid argument: expected ${expectedType} but received ${receivedType}.`);
+    super(`Invalid argument: expected ${expectedType}, received ${receivedType}`);
     this.name = 'ArgumentTypeError';
     this.expectedType = expectedType;
     this.receivedType = receivedType;
