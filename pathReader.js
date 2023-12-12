@@ -36,7 +36,7 @@ function getFile(targetPath, extension) {
 
 function getFilesFromDir(targetDirPath, extension, excludedNames) { // RECURSIVE
   let fileNames = [];
-  readdirSync(targetDirPath).forEach(name => {
+  readdirSync(targetDirPath).forEach(name => { // this is synchronous loop, may impact performance
     if (excludedNames.includes(name)) return;
     const fullPath = join(targetDirPath, name);
     if (lstatSync(fullPath).isDirectory()) {
