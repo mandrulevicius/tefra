@@ -132,7 +132,7 @@ function checkForGenericErrors(functionName, func) {
     resetAndThrow(new AsyncError());
   }
 }
-  
+
 function getParentGroup(functionName) {
   const parentGroup = groupStack[groupStack.length - 1];
   if (!parentGroup) {

@@ -1,12 +1,12 @@
 {
-  "name": "minostestframeworkjs",
-  "version": "0.1.0",
-  "description": "modular test framework",
+  "name": "tefrajs",
+  "version": "0.1.1",
+  "description": "regular old javascript test framework",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
-  "author": "Minos",
+  "author": "Mindaugas Andrulevicius",
   "license": "MIT"
 }
