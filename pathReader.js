@@ -6,6 +6,7 @@ import { checkType } from './typeChecker.js';
 
 const defaultExcludedNames = ['node_modules', '.git'];
 
+// what if we want to exclude specific paths, and have duplicate names in different paths?
 export function getFiles(targetPath = './', extension = '.js', customExcludedNames = []) {
   checkType(targetPath, 'string');
   checkType(customExcludedNames, 'array');
@@ -34,13 +35,13 @@ function getFile(targetPath, extension) {
   else throw new Error(`Invalid file '${targetPath}', expected '*${extension}'`);
 }
 
-function getFilesFromDir(targetDirPath, extension, excludedNames) { // RECURSIVE
+function getFilesFromDir(targetDirPath, extension, excludedNames) { // Recursive
   let fileNames = [];
   readdirSync(targetDirPath).forEach(name => { // this is synchronous loop, may impact performance
     if (excludedNames.includes(name)) return;
     const fullPath = join(targetDirPath, name);
     if (lstatSync(fullPath).isDirectory()) {
-      fileNames = fileNames.concat(getFilesFromDir(fullPath, excludedNames));
+      fileNames = fileNames.concat(getFilesFromDir(fullPath, extension, excludedNames));
     } else if (fullPath.endsWith(extension)) fileNames.push(fullPath);
   });
   return fileNames;

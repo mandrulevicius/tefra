@@ -1,13 +1,13 @@
 import { getFiles } from './pathReader.js';
 import './asserter.js';
 import tester from './tester.js';
-// THIS ARE NOT LIKE THE OTHERS? - maybe logical split
 import consoleLogger from './consoleLogger.js';
 
 // if any tests fail, maybe should throw results afterwards? (for pipelines)
 
 async function runTests(targetPath, excludedNames) {
   const jsFiles = getFiles(targetPath, '.test.js', excludedNames);
+  console.log('jsFiles', jsFiles);
 
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now

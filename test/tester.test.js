@@ -26,17 +26,17 @@ describe('tester correct specs', () => {
   it('should have status error', () => {
     equal(echoerResults.status, "error");
   });
-  it('should pass 19 specs', () => {
-    equal(echoerResults.passed, 19);
+  it('should pass 20 specs', () => {
+    equal(echoerResults.passed, 20);
   });
-  it('should fail 7 specs', () => {
-    equal(echoerResults.failed, 7);
+  it('should fail 8 specs', () => {
+    equal(echoerResults.failed, 8);
   });
   it('should catch 1 error in specs', () => {
     equal(echoerResults.error, 1);
   });
-  it('should result in a total of 27 specs', () => {
-    equal(echoerResults.total, 27);
+  it('should result in a total of 29 specs', () => {
+    equal(echoerResults.total, 29);
   });
   const testBlockOuter3details = echoerResults.details.testBlockOuter3.details;
   it('should pass test', () => {

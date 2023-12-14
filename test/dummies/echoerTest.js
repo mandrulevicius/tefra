@@ -58,11 +58,11 @@ describe('testBlockOuter3', () => {
     it('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
-    it(' ', () => { // TODO CLEANUP should fail if empty input
-      equal(echoer.echo(), 't2');
-    });
     it('should fail', () => {
       equal(echoer.echo('t1'), 't2');
+    });
+    it('should fail if empty input', () => {
+      equal(echoer.echo(), 't2');
     });
     it('should throw error', () => {
       equal(echoer.errFunc('t1'), 't1');
@@ -85,11 +85,20 @@ describe('testBlockOuterB', () => {
       throwsError(echoer.errFunc, new Error('bad'), 't1');
     });
   });
-  runTestBlockB2();
+  describe('testBlockB2', () => {
+    const obj = { t1: 't1', t2: { t3: 't3' } };
+    it('should pass - return same object as argument', () => {
+      is(echoer.echo(obj), obj);
+    });
+    it('should fail given equal objects with different refs', () => {
+      is(echoer.echo(obj), { t1: 't1', t2: { t3: 't3' } });
+    });
+  });
+  runTestBlockB3();
 });
 
-function runTestBlockB2() {
-  describe('testBlockB2', () => {
+function runTestBlockB3() {
+  describe('testBlockB3', () => {
     it('B2 should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });

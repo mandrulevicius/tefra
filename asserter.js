@@ -1,52 +1,45 @@
-function equal(expected, actual) {
-  return returnResult(isEqual(expected, actual), expected, actual);
+export function equal(actual, expected) {
+  if (isEqual(actual, expected)) return true;
+  throw { actual, expected };
 }
 
-function equalRefs(ref1, ref2) {
-  return returnResult(ref1 === ref2, ref1, ref2);
+export function is(actual, expected) {
+  if (actual === expected) return true;
+  throw { actual, expected };
 }
 
-function returnResult(pass, expected, actual) {
-  if (pass) return true;
-  throw { actual: expected, expected: actual };
-}
-
-function throwsError(callback, expectedError, ...args) {
+export function throwsError(callback, expectedError, ...args) {
   try {
     callback(...args);
-    throw { actual: 'No error', expected: 'Error' };
+    throw { actual: 'No error', expected: expectedError };
   } catch (error) {
     if (error.message === expectedError.message) return true;
     throw { actual: error.message, expected: expectedError.message };
   }
 }
 
-function isEqual(expected, actual) {
-  // could move most logic to setup, remove branches?
-  const PRIMITIVES = ['string', 'number', 'boolean', 'bigint', 'undefined', 'symbol'];
+// should generate jsdoc with @recursive
+export function isEqual(expected, actual) { // Recursive with areObjectsDeepEqual
   if (typeof expected !== typeof actual) return false;
   if (expected === null || actual === null) return expected === actual;
   // null is considered primitive, but typeof is 'object'
+  const PRIMITIVES = ['string', 'number', 'boolean', 'bigint', 'undefined', 'symbol'];
   if (PRIMITIVES.includes(typeof expected)) return expected === actual;
   if (typeof expected === 'function') return expected.toString() === actual.toString();
-  if (typeof expected === 'object') return areObjectsDeepEqual(expected, actual); // RECURSION!
-  // if here, something is very wrong and should break?
+  if (typeof expected === 'object') return areObjectsDeepEqual(expected, actual); // Recursion
+  throw new TypeError(`Unknown type: ${typeof expected}`);
 }
-// can i avoid two-function recursion by splitting up the function?
 
-function areObjectsDeepEqual(object1, object2) {
+function areObjectsDeepEqual(object1, object2) { // Recursive with isEqual
+  if (object1 === object2) return true; // reference equality, also solves circular reference issue
   if (Array.isArray(object1) && Array.isArray(object2)) {
     if (object1.length !== object2.length) return false;
   } else if (!Array.isArray(object1) && !Array.isArray(object2)) {
     if (Object.keys(object1).length !== Object.keys(object2).length) return false;
   } else return false;
-  
-  for (const i in object1) if (!isEqual(object1[i], object2[i])) return false; // RECURSION!
+  for (const i in object1) if (!isEqual(object1[i], object2[i])) return false; // Recursion
   return true;
 }
-
-// anonymous functions are equal if their contents are equal.
-// named functions are equal if their names AND contents are equal.
 
 function attachGlobal(func) {
   if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
@@ -54,8 +47,7 @@ function attachGlobal(func) {
 }
 
 attachGlobal(equal);
-attachGlobal(equalRefs);
+attachGlobal(is);
 attachGlobal(throwsError);
-attachGlobal(isEqual);
 
-export default { equal, equalRefs, throwsError, isEqual };
+export default { equal, is, throwsError, isEqual };
