@@ -5,15 +5,20 @@ import consoleLogger from './consoleLogger.js';
 
 // if any tests fail, maybe should throw results afterwards? (for pipelines)
 
-async function runTests(targetPath, excludedNames) {
+const defaultExcludedNames = ['node_modules', '.git'];
+const defaultPath = 'test';
+
+// get targetPath from command line args, excludedNames from setup?
+async function runTests(customTargetPath, customExcludedNames = []) {
+  const targetPath = customTargetPath ?? defaultPath;
+  const excludedNames = defaultExcludedNames.concat(customExcludedNames);
   const jsFiles = getFiles(targetPath, '.test.js', excludedNames);
-  console.log('jsFiles', jsFiles);
 
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now
     tester.initFileTest(testFile);
     console.log('Testing file:', testFile);
-    await import(testFile);
+    await import('./' + testFile);
     tester.updateResults();
     // log file totals
   }

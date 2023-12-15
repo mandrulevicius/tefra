@@ -99,9 +99,9 @@ describe('circular objects', () => {
   it('should be equal given circular objects', () => {
     const circularObj = { name: 'circle' };
     circularObj.circular = circularObj;
-    console.log('CIRCLE', circularObj);
     equal(isEqual(circularObj, circularObj), true);
   });
+  // what if one has one circlular ref, and the other a diffrent one?
   it('should not be equal given circular objects with different values', () => {
     const circularObj = { name: 'circle' };
     circularObj.circular = circularObj;
