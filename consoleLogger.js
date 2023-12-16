@@ -1,21 +1,20 @@
 function logGroupName(groupName, indent = '') {
-  console.log(`${indent}${groupName}`);
+  console.log(`  ${indent}${groupName}`);
 }
 
 function logSpecResult(spec, specName, indent = '') {
   if (spec.status === 'passed') {
-    console.log(`${indent}[+] ${specName}`);
+    console.log(`  ${indent}[+] ${specName}`);
   } else if (spec.status === 'failed') {
-    console.log(`${indent}[-] ${specName}`);
-    console.log(`${indent}  `, `Actual: ${JSON.stringify(spec.output.actual)}`);
-    console.log(`${indent}  `, `Expect: ${JSON.stringify(spec.output.expected)}`);
+    console.log(`  ${indent}[-] ${specName}`);
+    console.log(`  ${indent}  `, `Actual: ${JSON.stringify(spec.output.actual)}`);
+    console.log(`  ${indent}  `, `Expect: ${JSON.stringify(spec.output.expected)}`);
   } else {
-    console.log(`${indent}[x] ${specName} -`, spec.error);
+    console.log(`  ${indent}[x] ${specName} -`, spec.error);
   }
 }
 
 function logResults(results) {
-  console.log(``);
   console.log(`Status: ${results.status}`);
   console.log(`  Passed: ${results.passed}`);
   console.log(`  Failed: ${results.failed}`);

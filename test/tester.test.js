@@ -4,20 +4,20 @@ import tester from '../tester.js';
 
 const echoerResults = await runEchoerTest('./dummies/echoerTest.js');
 const incorrectSyntaxResults = await runBadSyntaxTest('./dummies/badSyntaxTest.js');
-tester.initFileTest('./tester.test.js');
+tester.initFileTest('test\\tester.test.js');
 
 async function runEchoerTest(testFile) {
   tester.initFileTest(testFile);
   await import(testFile);
   const results = getResults().details[testFile];
-  tester.clearResults();
+  tester.clearResults(testFile);
   return results;
 }
 
 async function runBadSyntaxTest(testFile) {
   tester.initFileTest(testFile);
   const results = await import(testFile);
-  tester.clearResults();
+  tester.clearResults(testFile);
   return results.default;
 }
 

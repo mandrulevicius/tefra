@@ -34,8 +34,9 @@ function getResults() {
   return JSON.parse(JSON.stringify(results));
 }
 
-function clearResults() {
-  results = new Result();
+function clearResults(fileName) {
+  if (!fileName) results = new Result();
+  else delete results.details[fileName];
 }
 
 function setLogToConsole(newLogToConsole) {

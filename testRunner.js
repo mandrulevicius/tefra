@@ -13,18 +13,23 @@ async function runTests(customTargetPath, customExcludedNames = []) {
   const targetPath = customTargetPath ?? defaultPath;
   const excludedNames = defaultExcludedNames.concat(customExcludedNames);
   const jsFiles = getFiles(targetPath, '.test.js', excludedNames);
+  
+  // maybe should not log directly to console
+  // maybe should respect the logToConsole flag
+  // maybe log to console should be global
 
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now
     tester.initFileTest(testFile);
-    console.log('Testing file:', testFile);
+    console.log('\nTesting file:', testFile);
     await import('./' + testFile);
+    consoleLogger.logResults(getResults().details[testFile]);
     tester.updateResults();
-    // log file totals
   }
   const results = getResults();
   tester.clearResults();
   //const results = globalTester.run(); // async?
+  console.log('\n~~~ Total Results ~~~');
   consoleLogger.logResults(results);
   return results;
 }
