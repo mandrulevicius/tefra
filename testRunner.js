@@ -16,7 +16,7 @@ async function runTests(customTargetPath, customExcludedNames = []) {
   
   // maybe should not log directly to console
   // maybe should respect the logToConsole flag
-  // maybe log to console should be global
+  // maybe logToConsole should be global
 
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now
@@ -33,6 +33,5 @@ async function runTests(customTargetPath, customExcludedNames = []) {
   consoleLogger.logResults(results);
   return results;
 }
-
 
 export default { runTests };

@@ -1,6 +1,6 @@
 {
   "name": "tefrajs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "regular old javascript test framework",
   "type": "module",
   "main": "index.js",
