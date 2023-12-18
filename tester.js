@@ -8,7 +8,7 @@ const groupStack = [];
 let inside = null;
 let currentFile = null;
 
-// LATER - NOW NOT SURE WHAT STRUCTURE WOULD BE BETTER
+// LATER - CURRENTLY NOT SURE WHAT STRUCTURE WOULD BE BETTER
 // should think about how to restructure this. 
 // this cares too much about files.
 // tester should just test and produce result.
@@ -71,6 +71,7 @@ function it(specName, specFunction) {
   const specResult = testSpec(group, specFunction);
   group.details[specName] = specResult;
   group[specResult.status] += 1;
+  group.duration += specResult.duration;
   group.updateStatus();
 
   if (logToConsole)
@@ -104,9 +105,11 @@ function onEach(name, func) {
 function testSpec(group, specFunction) {
   try {
     if (group.beforeEach) group.beforeEach();
+    const beforeTime = performance.now();
     specFunction();
+    const afterTime = performance.now();
     if (group.afterEach) group.afterEach();
-    return { status: 'passed' };
+    return { status: 'passed', duration: afterTime - beforeTime };
   } catch(error) {
     if (error instanceof StructureError) throw error;
     if (error instanceof ArgumentTypeError) throw error;

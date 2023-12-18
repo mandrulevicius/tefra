@@ -1,10 +1,11 @@
 class Result {
-  constructor(status, passed = 0, failed = 0, error = 0, total = 0, details = {}) {
+  constructor(status, passed = 0, failed = 0, error = 0, total = 0, duration = 0, details = {}) {
     this.status = status;
     this.passed = passed;
     this.failed = failed;
     this.error = error;
     this.total = total;
+    this.duration = duration;
     this.details = details;
     // TODO make private, access only through setters and getters
     // later add parent, maybe name
@@ -15,6 +16,7 @@ class Result {
     this.failed += child.failed;
     this.error += child.error;
     this.total += child.total;
+    this.duration += child.duration;
     this.updateStatus();
   }
   // Maybe should have just counted file totals - group subtotals don't seem to be that useful.

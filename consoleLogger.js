@@ -4,7 +4,7 @@ function logGroupName(groupName, indent = '') {
 
 function logSpecResult(spec, specName, indent = '') {
   if (spec.status === 'passed') {
-    console.log(`  ${indent}[+] ${specName}`);
+    console.log(`  ${indent}[+] ${specName} [${spec.duration.toFixed(3)} ms]`);
   } else if (spec.status === 'failed') {
     console.log(`  ${indent}[-] ${specName}`);
     console.log(`  ${indent}  `, `Actual: ${JSON.stringify(spec.output.actual)}`);
@@ -20,6 +20,7 @@ function logResults(results) {
   console.log(`  Failed: ${results.failed}`);
   console.log(`  Error: ${results.error}`);
   console.log(`  Total: ${results.total}`);
+  console.log(`  Duration: ${results.duration.toFixed(3)} ms`);
 }
 
 export default { logGroupName, logSpecResult, logResults };
