@@ -18,7 +18,7 @@ let currentFile = null;
 function initFileTest(fileName) {
   clearState();
   currentFile = fileName;
-  results.details[currentFile] = new Result();
+  results.addChild(currentFile);
 }
 
 function clearState() {
@@ -26,17 +26,14 @@ function clearState() {
   inside = null;
 }
 
-function updateResults() {
-  results.update(results.details[currentFile]);
-}
-
-function getResults() {
-  return JSON.parse(JSON.stringify(results));
+function getResults(testFile) {
+  if (!testFile) return results.getResults();
+  return results.getChild(testFile).getResults();
 }
 
 function clearResults(fileName) {
   if (!fileName) results = new Result();
-  else delete results.details[fileName];
+  else results.removeChild(fileName);
 }
 
 function setLogToConsole(newLogToConsole) {
@@ -46,20 +43,18 @@ function setLogToConsole(newLogToConsole) {
 function describe(groupName, groupFunction) {
   checkForName(groupName);
   checkForGenericErrors(describe.name, groupFunction);
-  const parentGroup = groupStack[groupStack.length - 1] || results.details[currentFile];
+  const parentGroup = groupStack[groupStack.length - 1] || results.getChild(currentFile);
   checkForDuplicates(describe.name, groupName, parentGroup.details);
 
   if (logToConsole)
     consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length));
 
-  const currentGroup = new Result();
-  parentGroup.details[groupName] = currentGroup;
+  const currentGroup = parentGroup.addChild(groupName);
   groupStack.push(currentGroup);
   if (parentGroup.beforeEach) parentGroup.beforeEach();
   groupFunction();
   if (parentGroup.afterEach) parentGroup.afterEach();
   groupStack.pop();
-  parentGroup.update(currentGroup);
 }
 
 function it(specName, specFunction) {
@@ -69,10 +64,7 @@ function it(specName, specFunction) {
   checkForDuplicates(it.name, specName, group.details);
   inside = it.name;
   const specResult = testSpec(group, specFunction);
-  group.details[specName] = specResult;
-  group[specResult.status] += 1;
-  group.duration += specResult.duration;
-  group.updateStatus();
+  group.addSpecResult(specName, specResult);
 
   if (logToConsole)
     consoleLogger.logSpecResult(
@@ -82,7 +74,6 @@ function it(specName, specFunction) {
     );
 
   inside = null;
-  group.total += 1;
 };
 
 function beforeEach(setupFunction) {
@@ -103,19 +94,21 @@ function onEach(name, func) {
 }
 
 function testSpec(group, specFunction) {
+  const beforeTime = performance.now();
   try {
     if (group.beforeEach) group.beforeEach();
-    const beforeTime = performance.now();
     specFunction();
-    const afterTime = performance.now();
     if (group.afterEach) group.afterEach();
+    const afterTime = performance.now();
     return { status: 'passed', duration: afterTime - beforeTime };
   } catch(error) {
+    const afterTime = performance.now();
+    const duration = afterTime - beforeTime;
     if (error instanceof StructureError) throw error;
     if (error instanceof ArgumentTypeError) throw error;
     if (error instanceof AsyncError) throw error;
-    if (error instanceof Error) return { status: 'error', error: error };
-    return { status: 'failed', output: error };
+    if (error instanceof Error) return { status: 'error', error, duration };
+    return { status: 'failed', output: error, duration };
   }
 }
 
@@ -172,7 +165,7 @@ attachGlobal(afterEach);
 attachGlobal(setLogToConsole);
 attachGlobal(getResults);
 
-export default { initFileTest, updateResults, clearResults };
+export default { initFileTest, clearResults };
 
 // DESIGN:
 // results can be output anywhere, not the responsibility of tester

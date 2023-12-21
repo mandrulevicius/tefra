@@ -23,8 +23,7 @@ async function runTests(customTargetPath, customExcludedNames = []) {
     tester.initFileTest(testFile);
     console.log('\nTesting file:', testFile);
     await import('./' + testFile);
-    consoleLogger.logResults(getResults().details[testFile]);
-    tester.updateResults();
+    consoleLogger.logResults(getResults(testFile));
   }
   const results = getResults();
   tester.clearResults();

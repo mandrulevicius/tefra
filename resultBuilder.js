@@ -1,32 +1,94 @@
 class Result {
-  constructor(status, passed = 0, failed = 0, error = 0, total = 0, duration = 0, details = {}) {
-    this.status = status;
-    this.passed = passed;
-    this.failed = failed;
-    this.error = error;
-    this.total = total;
-    this.duration = duration;
-    this.details = details;
-    // TODO make private, access only through setters and getters
-    // later add parent, maybe name
+  #parent;
+  #status;
+  #passed;
+  #failed;
+  #error;
+  #total;
+  #duration;
+  #details;
+
+  constructor(parent) {
+    this.#parent = parent;
+    this.#status = null;
+    this.#passed = 0;
+    this.#failed = 0;
+    this.#error = 0;
+    this.#total = 0;
+    this.#duration = 0;
+    this.#details = {};
   }
 
-  update(child) {
-    this.passed += child.passed;
-    this.failed += child.failed;
-    this.error += child.error;
-    this.total += child.total;
-    this.duration += child.duration;
-    this.updateStatus();
+  get totals() {
+    return {
+      status: this.#status,
+      passed: this.#passed,
+      failed: this.#failed,
+      error: this.#error,
+      total: this.#total,
+      duration: this.#duration
+    };
   }
+
+  get details() {
+    return this.#details;
+  }
+
+  getResults() {
+    return {
+      status: this.#status,
+      passed: this.#passed,
+      failed: this.#failed,
+      error: this.#error,
+      total: this.#total,
+      duration: this.#duration,
+      details: this.#details
+    };
+  }
+
+  getChild(name) {
+    return this.#details[name];
+  }
+
+  addChild(name) {
+    this.#details[name] = new Result(this);
+    return this.#details[name];
+  }
+
+  removeChild(name) {
+    const childTotals = this.#details[name].totals;
+    this.#passed -= childTotals.passed;
+    this.#failed -= childTotals.failed;
+    this.#error -= childTotals.error;
+    this.#total -= childTotals.total;
+    this.#duration -= childTotals.duration;
+    delete this.#details[name];
+    this.#updateStatus();
+  }
+
+  addSpecResult(specName, specResult) {
+    this.#details[specName] = specResult;
+    this.#updateResult(specResult);
+  }
+
+  #updateResult(specResult) {
+    if (specResult.status === 'passed') this.#passed += 1;
+    if (specResult.status === 'failed') this.#failed += 1;
+    if (specResult.status === 'error') this.#error += 1;
+    this.#duration += specResult.duration;
+    this.#total += 1;
+    this.#updateStatus();
+    if (this.#parent) this.#parent.#updateResult(specResult);
+  }
+
   // Maybe should have just counted file totals - group subtotals don't seem to be that useful.
   // Should have defined the problem better, but it's ok, did not add too much complexity.
   // BEFORE TRYING TO CREATE A FULL STRUCTURE FOR ALL FILES, SEE IF WONT BE EASIER TO JUST SUM IT UP.
 
-  updateStatus() {
-    if (this.passed === this.total) this.status = 'pass';
-    if (this.failed > 0) this.status = 'fail';
-    if (this.error > 0) this.status = 'error';
+  #updateStatus() {
+    if (this.#passed === this.#total) this.#status = 'pass';
+    if (this.#failed > 0) this.#status = 'fail';
+    if (this.#error > 0) this.#status = 'error';
   }
 
   //test what was going on with this

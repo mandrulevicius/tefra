@@ -9,7 +9,7 @@ tester.initFileTest('test\\tester.test.js');
 async function runEchoerTest(testFile) {
   tester.initFileTest(testFile);
   await import(testFile);
-  const results = getResults().details[testFile];
+  const results = getResults(testFile);
   tester.clearResults(testFile);
   return results;
 }
