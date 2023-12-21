@@ -1,4 +1,5 @@
 class Result {
+  #name;
   #parent;
   #status;
   #passed;
@@ -8,7 +9,8 @@ class Result {
   #duration;
   #details;
 
-  constructor(parent) {
+  constructor(name, parent) {
+    this.#name = name;
     this.#parent = parent;
     this.#status = null;
     this.#passed = 0;
@@ -17,6 +19,10 @@ class Result {
     this.#total = 0;
     this.#duration = 0;
     this.#details = {};
+  }
+
+  get name() {
+    return this.#name;
   }
 
   get totals() {
@@ -36,6 +42,8 @@ class Result {
 
   getResults() {
     return {
+      name: this.#name,
+      parent: this.#parent,
       status: this.#status,
       passed: this.#passed,
       failed: this.#failed,
@@ -51,7 +59,7 @@ class Result {
   }
 
   addChild(name) {
-    this.#details[name] = new Result(this);
+    this.#details[name] = new Result(name, this);
     return this.#details[name];
   }
 
@@ -66,8 +74,8 @@ class Result {
     this.#updateStatus();
   }
 
-  addSpecResult(specName, specResult) {
-    this.#details[specName] = specResult;
+  addSpecResult(name, specResult) {
+    this.#details[name] = { name, ...specResult };
     this.#updateResult(specResult);
   }
 
@@ -81,31 +89,16 @@ class Result {
     if (this.#parent) this.#parent.#updateResult(specResult);
   }
 
-  // Maybe should have just counted file totals - group subtotals don't seem to be that useful.
-  // Should have defined the problem better, but it's ok, did not add too much complexity.
-  // BEFORE TRYING TO CREATE A FULL STRUCTURE FOR ALL FILES, SEE IF WONT BE EASIER TO JUST SUM IT UP.
-
   #updateStatus() {
     if (this.#passed === this.#total) this.#status = 'pass';
     if (this.#failed > 0) this.#status = 'fail';
     if (this.#error > 0) this.#status = 'error';
   }
 
-  //test what was going on with this
-// function determineGroupStatus(group) {
-//   if (group.error > 0) return 'error';
-//   if (group.failed > 0) return 'failed';
-//   if (group.passed === group.total) return 'passed'; // WHY IS STATUS PENDING??
-//   return 'pending'; // this is not really a status, but it is used for logging, maybe
-// }
+  // Maybe should have just counted file totals - group subtotals don't seem to be that useful.
+  // Should have defined the problem better, but it's ok, did not add too much complexity.
+  // BEFORE TRYING TO CREATE A FULL STRUCTURE FOR ALL FILES, SEE IF WONT BE EASIER TO JUST SUM IT UP.
 
-  // updateResults(parent, result) {
-  //   this[result.status] += 1;
-  //   this.status = determineGroupStatus(group);
-
-  //   parent.updateResults() // how to get next level parent?
-  //   // maybe shouldnt complicate it, leave fanciness for later
-  // }
 }
 
 export default Result;

@@ -1,6 +1,5 @@
 import { StructureError, ArgumentTypeError, AsyncError } from '../errors.js';
 import tester from '../tester.js';
-//import incorrectSyntaxResults from './dummies/badSyntax.js';
 
 const echoerResults = await runEchoerTest('./dummies/echoerTest.js');
 const incorrectSyntaxResults = await runBadSyntaxTest('./dummies/badSyntaxTest.js');

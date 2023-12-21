@@ -1,5 +1,8 @@
 // feel like this project is too small to be concerned about global utilities
 
+// on the other hand, have 3 places where attachGlobal is duplicated
+
+
 import { ArgumentTypeError } from './errors.js';
 
 const globalNamespace = determineGlobal();

@@ -1,19 +1,10 @@
 import Result from './resultBuilder.js';
-import consoleLogger from './consoleLogger.js';
 import { ArgumentTypeError, StructureError, AsyncError } from './errors.js';
 
-let results = new Result();
-let logToConsole = true;
+let results = new Result('root');
 const groupStack = [];
 let inside = null;
 let currentFile = null;
-
-// LATER - CURRENTLY NOT SURE WHAT STRUCTURE WOULD BE BETTER
-// should think about how to restructure this. 
-// this cares too much about files.
-// tester should just test and produce result.
-// testRunner should just run files and collect results.
-// testRunner should clear results after each file?
 
 function initFileTest(fileName) {
   clearState();
@@ -32,12 +23,8 @@ function getResults(testFile) {
 }
 
 function clearResults(fileName) {
-  if (!fileName) results = new Result();
+  if (!fileName) results = new Result('root');
   else results.removeChild(fileName);
-}
-
-function setLogToConsole(newLogToConsole) {
-  logToConsole = newLogToConsole;
 }
 
 function describe(groupName, groupFunction) {
@@ -45,10 +32,6 @@ function describe(groupName, groupFunction) {
   checkForGenericErrors(describe.name, groupFunction);
   const parentGroup = groupStack[groupStack.length - 1] || results.getChild(currentFile);
   checkForDuplicates(describe.name, groupName, parentGroup.details);
-
-  if (logToConsole)
-    consoleLogger.logGroupName(groupName, '  '.repeat(groupStack.length));
-
   const currentGroup = parentGroup.addChild(groupName);
   groupStack.push(currentGroup);
   if (parentGroup.beforeEach) parentGroup.beforeEach();
@@ -65,14 +48,6 @@ function it(specName, specFunction) {
   inside = it.name;
   const specResult = testSpec(group, specFunction);
   group.addSpecResult(specName, specResult);
-
-  if (logToConsole)
-    consoleLogger.logSpecResult(
-      group.details[specName],
-      specName,
-      '  '.repeat(groupStack.length)
-    );
-
   inside = null;
 };
 
@@ -162,37 +137,22 @@ attachGlobal(describe);
 attachGlobal(it);
 attachGlobal(beforeEach);
 attachGlobal(afterEach);
-attachGlobal(setLogToConsole);
 attachGlobal(getResults);
 
 export default { initFileTest, clearResults };
 
 // DESIGN:
-// results can be output anywhere, not the responsibility of tester
-// in fact, even logging to console should be a concern of tester
-// we are making this concession for now for easy of use, but might remove in the future if unneeded
-
-// DESIGN:
 // tester is core, should not care about output types. But real life is messy, so here we are.
 // in this case, for a test framework, smooth consumer experience is absolutely essential,
 // so better to leave a dependency rather than overengineer and add extra baggage for consumer.
-// why not have both? expose the abstraction
+// Why not have both? expose the abstraction?
 // currently, dont see any gains for the additional complexity.
 // if at any point potential gains become apparent, will refactor.
 
-// might need serious refactoring, depending on how the multiple file implementation goes.
-
-// TODO use or delete after multiple file implementation is done
-// POSSIBLE REFACTOR:
-// middleLayer.js
-/*
-import testerCore from './testerCore.js';
-
-async function setOutputter(outputterName) {
-  const outputter = await import(`./${outputterName}.js`);
-  testerCore.setOutputter(outputter);
-}
-
-export default { ...testerCore, setOutputter };
-
-*/
+// DESIGN:
+// should think about how to restructure this. 
+// this cares too much about files.
+// tester should just test and produce result.
+// testRunner should just run files and collect results.
+// testRunner should clear results after each file?
+// CURRENTLY NOT SURE WHAT STRUCTURE WOULD BE BETTER
