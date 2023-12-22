@@ -46,16 +46,16 @@ describe('objects', () => {
 
 describe('deep objects', () => {
   it('should be equal given deep equal objects', () => {
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { bay: "yea" } }), true);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea' } }), true);
   });
   it('should not be equal given deep different objects', () => {
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { bay: "ye" } }), false);
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { bay: "yea", ho: "ho" } }), false);
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { ho: "yea" } }), false);
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: "yea" }), false);
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { bay: "yea", ho: "ho" } }), false);
-    equal(isEqual({ hey: { bay: "yea" } }, { hey: { bay: "yea" } }), true);
-    equal(isEqual({ hey: { bay: "yea" } }, {}), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'ye' } }), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea', ho: 'ho' } }), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { ho: 'yea' } }), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: 'yea' }), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea', ho: 'ho' } }), false);
+    equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea' } }), true);
+    equal(isEqual({ hey: { bay: 'yea' } }, {}), false);
   });
 });
 

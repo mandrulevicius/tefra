@@ -23,7 +23,7 @@ async function runBadSyntaxTest(testFile) {
 setLogToConsole(true);
 describe('tester correct specs', () => {
   it('should have status error', () => {
-    equal(echoerResults.status, "error");
+    equal(echoerResults.status, 'error');
   });
   it('should pass 20 specs', () => {
     equal(echoerResults.passed, 20);

@@ -1,5 +1,6 @@
 import Result from './resultBuilder.js';
 import { ArgumentTypeError, StructureError, AsyncError } from './errors.js';
+import { attachGlobal } from './globalizer.js';
 
 let results = new Result('root');
 const groupStack = [];
@@ -126,11 +127,6 @@ function checkForDuplicates(functionName, groupName = '', groupDetails) {
 function resetAndThrow(error) {
   clearState();
   throw error;
-}
-
-function attachGlobal(func) {
-  if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
-  global[func.name] = func;
 }
 
 attachGlobal(describe);

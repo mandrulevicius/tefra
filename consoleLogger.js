@@ -1,3 +1,5 @@
+import { attachGlobal } from "./globalizer";
+
 let logToConsole = true;
 
 function setLogToConsole(value) {
@@ -49,11 +51,6 @@ function logTotals(results) {
   console.log(`  Total: ${results.total}`);
   console.log(`  Duration: ${results.duration.toFixed(3)} ms`);
   console.log('\n');
-}
-
-function attachGlobal(func) {
-  if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
-  global[func.name] = func;
 }
 
 attachGlobal(setLogToConsole);

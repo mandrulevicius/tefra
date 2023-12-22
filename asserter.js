@@ -1,3 +1,5 @@
+import { attachGlobal } from "./globalizer";
+
 export function equal(actual, expected) {
   if (isEqual(actual, expected)) return true;
   throw { actual, expected };
@@ -39,11 +41,6 @@ function areObjectsDeepEqual(object1, object2) { // Recursive with isEqual
   } else return false;
   for (const i in object1) if (!isEqual(object1[i], object2[i])) return false; // Recursion
   return true;
-}
-
-function attachGlobal(func) {
-  if (global[func.name]) throw new Error(`Global already contains ${func.name}`);
-  global[func.name] = func;
 }
 
 attachGlobal(equal);

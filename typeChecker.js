@@ -1,4 +1,4 @@
-import { ArgumentTypeError } from "./errors.js";
+import { ArgumentTypeError } from './errors.js';
 
 export function checkType(argument, expectedType) {
   if (typeof argument === expectedType) return true;
