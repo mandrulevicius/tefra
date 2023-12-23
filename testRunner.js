@@ -8,8 +8,16 @@ import consoleLogger from './consoleLogger.js';
 const defaultExcludedNames = ['node_modules', '.git'];
 const defaultPath = 'test';
 
-// get targetPath from command line args, excludedNames from setup?
+/**
+ * Runs all test files in the given target path, excluding files/folders in the excludedNames array.
+ * Imports and runs each test file, logs the results, and returns the aggregated test results.
+ *
+ * @param {string} [customTargetPath] - Path to look for test files in. Defaults to 'test'.
+ * @param {string[]} [customExcludedNames] - Additional names of files/folders to exclude from test run.
+ * @returns {Object} The aggregated results from running all test files.
+ */
 async function runTests(customTargetPath, customExcludedNames = []) {
+  // get targetPath from command line args, excludedNames from setup?
   const targetPath = customTargetPath ?? defaultPath;
   const excludedNames = defaultExcludedNames.concat(customExcludedNames);
   const jsFiles = getFiles(targetPath, '.test.js', excludedNames);

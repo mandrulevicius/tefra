@@ -7,10 +7,27 @@ const groupStack = [];
 let inside = null;
 let currentFile = null;
 
+/**
+ * Initializes the test state for a new test file.
+ * Clears the test state, sets the current test file name,
+ * and adds the file as a child to the root test results.
+ *
+ * @param {string} fileName - The name of the test file being initialized
+ */
 function initFileTest(fileName) {
   clearState();
   currentFile = fileName;
   results.addChild(currentFile);
+}
+
+/**
+ * Clears the test results for a given file name.
+ * If no file name is provided, clears all test results and resets to initial state.
+ * If a file name is provided, removes only that file's results.
+ */
+function clearResults(fileName) {
+  if (!fileName) results = new Result('root');
+  else results.removeChild(fileName);
 }
 
 function clearState() {
@@ -18,16 +35,23 @@ function clearState() {
   inside = null;
 }
 
+/**
+ * Gets the test results for a given test file.
+ * If no file is provided, returns the root test results.
+ * If a file is provided, returns the results for that specific file.
+ */
 function getResults(testFile) {
   if (!testFile) return results.getResults();
   return results.getChild(testFile).getResults();
 }
 
-function clearResults(fileName) {
-  if (!fileName) results = new Result('root');
-  else results.removeChild(fileName);
-}
-
+/**
+ * Creates a test group with the given name and runs the callback function to
+ * define tests within that group. Handles setup/teardown at the group level.
+ *
+ * @param {string} groupName - The name of the test group
+ * @param {Function} groupFunction - The callback function that defines tests in the group
+ */
 function describe(groupName, groupFunction) {
   checkForName(groupName);
   checkForGenericErrors(describe.name, groupFunction);
@@ -41,20 +65,40 @@ function describe(groupName, groupFunction) {
   groupStack.pop();
 }
 
-function it(specName, specFunction) {
+
+/**
+ * Defines a test spec with the given name and runs the callback
+ * function to execute the spec. Handles setup/teardown at the spec level.
+ *
+ * @param {string} specName - The name of the test spec
+ * @param {Function} specFunction - The callback function that runs the test spec
+ */
+function test(specName, specFunction) {
   checkForName(specName);
-  checkForGenericErrors(it.name, specFunction);
-  const group = getParentGroup(it.name);
-  checkForDuplicates(it.name, specName, group.details);
-  inside = it.name;
+  checkForGenericErrors(test.name, specFunction);
+  const group = getParentGroup(test.name);
+  checkForDuplicates(test.name, specName, group.details);
+  inside = test.name;
   const specResult = testSpec(group, specFunction);
   group.addSpecResult(specName, specResult);
   inside = null;
-};
+}
 
+/**
+ * Registers a setup function to run before each test in the current
+ * test group. The setupFunction will run before each test group or spec.
+ *
+ * @param {Function} setupFunction - The setup function to run before each test.
+ */
 function beforeEach(setupFunction) {
   onEach(beforeEach.name, setupFunction);
 }
+/**
+ * Registers a teardown function to run after each test in the current
+ * test group. The teardownFunction will run after each test group or spec.
+ *
+ * @param {Function} teardownFunction - The teardown function to run after each test.
+ */
 function afterEach(teardownFunction) {
   onEach(afterEach.name, teardownFunction);
 }
@@ -130,7 +174,7 @@ function resetAndThrow(error) {
 }
 
 attachGlobal(describe);
-attachGlobal(it);
+attachGlobal(test);
 attachGlobal(beforeEach);
 attachGlobal(afterEach);
 attachGlobal(getResults);

@@ -3,15 +3,15 @@ import echoer from './echoer.js';
 setLogToConsole(false);
 describe('FunctestBlockOuter', function () {
   describe('Functest BlockInner1', function () {
-    it('Funcshould pass - return same value as argument', function () {
+    test('Funcshould pass - return same value as argument', function () {
       equal(echoer.echo('t1'), 't1');
     });
-    it('Funcshould fail', function () {
+    test('Funcshould fail', function () {
       equal(echoer.echo('t1'), 't2');
     });
   });
   describe('FunctestBlockInner2', function () {
-    it('Funcshould pass - return same value as argument', function () {
+    test('Funcshould pass - return same value as argument', function () {
       equal(echoer.echo('t1'), 't1');
     });
   });
@@ -22,16 +22,16 @@ describe('FunctestBlockOuter2', function () {
 
 describe('testBlockOuter3', () => {
   describe('testBlock', () => {
-    it('should pass - return same value as argument', () => {
+    test('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
-    it('should fail', () => {
+    test('should fail', () => {
       equal(echoer.echo('t1'), 't2');
     });
-    it('should pass - return output object', () => {
+    test('should pass - return output object', () => {
       equal(echoer.badStringInput('t1', 'a'), { success: true, output: 't1a' });
     });
-    it('should pass - return validation issue', () => {
+    test('should pass - return validation issue', () => {
       // this seems way too clunky
       equal(echoer.badStringInput(3, { foo: 'bar' }), {
         success: false,
@@ -50,21 +50,21 @@ describe('testBlockOuter3', () => {
       equal(result.error.received, 'number');
       equal(result.error.input, 123);
     });
-    it('should catch error', () => {
+    test('should catch error', () => {
       throwsError(echoer.errFunc, new Error('bad'), 't1');
     });
   });
   describe('testBlock2', () => {
-    it('should pass - return same value as argument', () => {
+    test('should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
-    it('should fail', () => {
+    test('should fail', () => {
       equal(echoer.echo('t1'), 't2');
     });
-    it('should fail if empty input', () => {
+    test('should fail if empty input', () => {
       equal(echoer.echo(), 't2');
     });
-    it('should throw error', () => {
+    test('should throw error', () => {
       equal(echoer.errFunc('t1'), 't1');
     });
   });
@@ -72,25 +72,25 @@ describe('testBlockOuter3', () => {
 
 describe('testBlockOuterB', () => {
   describe('testBlockB1', () => {
-    it('should pass - return same object as argument', () => {
+    test('should pass - return same object as argument', () => {
       equal(echoer.echo({ t1: 't1', t2: { t3: 't3' } }), { t1: 't1', t2: { t3: 't3' } });
     });
-    it('should fail', () => {
+    test('should fail', () => {
       equal(echoer.echo({ t1: 't1', t2: { t3: 't5' } }), { t1: 't1', t2: { t3: 't3' } });
     });
-    it('should fail2', () => {
+    test('should fail2', () => {
       equal(echoer.echo(2), 3);
     });
-    it('should catch error', () => {
+    test('should catch error', () => {
       throwsError(echoer.errFunc, new Error('bad'), 't1');
     });
   });
   describe('testBlockB2', () => {
     const obj = { t1: 't1', t2: { t3: 't3' } };
-    it('should pass - return same object as argument', () => {
+    test('should pass - return same object as argument', () => {
       is(echoer.echo(obj), obj);
     });
-    it('should fail given equal objects with different refs', () => {
+    test('should fail given equal objects with different refs', () => {
       is(echoer.echo(obj), { t1: 't1', t2: { t3: 't3' } });
     });
   });
@@ -99,13 +99,13 @@ describe('testBlockOuterB', () => {
 
 function runTestBlockB3() {
   describe('testBlockB3', () => {
-    it('B2 should pass - return same value as argument', () => {
+    test('B2 should pass - return same value as argument', () => {
       equal(echoer.echo('t1'), 't1');
     });
-    it('B2 should fail', () => {
+    test('B2 should fail', () => {
       equal(echoer.echo('t1'), 't2');
     });
-    it('B2 should catch error', () => {
+    test('B2 should catch error', () => {
       throwsError(echoer.errFunc, new Error('bad'), 't1');
     });
   });
@@ -113,7 +113,7 @@ function runTestBlockB3() {
 
 describe('testEmptyBlock', () => {});
 describe('testEmptyIt', () => {
-  it('empty it', () => {});
+  test('empty test', () => {});
 });
 
 describe('setup and teardown', () => {
@@ -126,19 +126,19 @@ describe('setup and teardown', () => {
     teardown = null;
   });
   describe('SnT inner 1', () => {
-    it('should pass -  setup value reset', () => {
+    test('should pass -  setup value reset', () => {
       equal(echoer.echo(setup), 0);
       setup = 't1';
     });
-    it('should pass - teardown value not reset yet', () => {
+    test('should pass - teardown value not reset yet', () => {
       equal(echoer.echo(teardown), 'tear');
     });
   });
-  describe('SnT inner 2 for it function', () => {
-    it('should pass - setup value reset', () => {
+  describe('SnT inner 2 for test function', () => {
+    test('should pass - setup value reset', () => {
       equal(echoer.echo(setup), 0);
     });
-    it('should pass - teardown value reset', () => {
+    test('should pass - teardown value reset', () => {
       equal(echoer.echo(teardown), null);
     });
 
@@ -150,14 +150,14 @@ describe('setup and teardown', () => {
     afterEach(() => {
       teardownIt = null;
     });
-    it('should pass - teardownIt value not reset yet', () => {
+    test('should pass - teardownIt value not reset yet', () => {
       equal(echoer.echo(teardownIt), 'tear');
       setupIt = 2;
     });
-    it('should pass - setupIt value reset', () => {
+    test('should pass - setupIt value reset', () => {
       equal(echoer.echo(setupIt), 0);
     });
-    it('should pass - teardownIt value reset', () => {
+    test('should pass - teardownIt value reset', () => {
       equal(echoer.echo(teardownIt), null);
     });
   });;

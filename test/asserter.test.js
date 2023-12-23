@@ -1,11 +1,11 @@
 import { isEqual } from '../asserter.js';
 
 describe('primitives', () => {
-  it('should be equal given equal values', () => {
+  test('should be equal given equal values', () => {
     equal(isEqual(1, 1), true);
     equal(isEqual('t1', 't1'), true);
   });
-  it('should not be equal given different values', () => {
+  test('should not be equal given different values', () => {
     equal(isEqual(1, 2), false);
     equal(isEqual(0, false), false);
     equal(isEqual(1, '1'), false);
@@ -31,10 +31,10 @@ describe('primitives', () => {
 })
 
 describe('objects', () => {
-  it('should be equal given equal objects', () => {
+  test('should be equal given equal objects', () => {
     equal(isEqual({ hey: 't1' }, { hey: 't1' }), true);
   });
-  it('should not be equal given different objects', () => {
+  test('should not be equal given different objects', () => {
     equal(isEqual({ hey: 't1' }, { hey: 't2' }), false);
     equal(isEqual({ hey: 't1' }, { hey: 't1', ho: 't2' }), false);
     equal(isEqual({ hey: 't1' }, { ho: 't1' }), false);
@@ -45,10 +45,10 @@ describe('objects', () => {
 });
 
 describe('deep objects', () => {
-  it('should be equal given deep equal objects', () => {
+  test('should be equal given deep equal objects', () => {
     equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea' } }), true);
   });
-  it('should not be equal given deep different objects', () => {
+  test('should not be equal given deep different objects', () => {
     equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'ye' } }), false);
     equal(isEqual({ hey: { bay: 'yea' } }, { hey: { bay: 'yea', ho: 'ho' } }), false);
     equal(isEqual({ hey: { bay: 'yea' } }, { hey: { ho: 'yea' } }), false);
@@ -69,14 +69,14 @@ describe('functions', () => {
   function test3 () {
     return 'ran different function'
   }
-  it('should be equal given same functions', () => {
+  test('should be equal given same functions', () => {
     const funky1 = test1;
     equal(isEqual(funky1, test1), true);
   });
-  it('should not be equal given equal functions with different names', () => {
+  test('should not be equal given equal functions with different names', () => {
     equal(isEqual(test1, test2), false)
   });
-  it('should not be equal given different functions', () => {
+  test('should not be equal given different functions', () => {
     equal(isEqual(test1, test3), false)
   });
 });
@@ -87,22 +87,21 @@ describe('anonymous functions', () => {
     anon2: () => 'ran anon function',
     anon3: () => 'ran different anon function'
   }
-  it('should be equal given equal anonymous functions', () => {
+  test('should be equal given equal anonymous functions', () => {
     equal(isEqual(testers.anon1, testers.anon2), true);
   });
-  it('should not be equal given different anonymous functions', () => {
+  test('should not be equal given different anonymous functions', () => {
     equal(isEqual(testers.anon1, testers.anon3), false);
   });
 });
 
 describe('circular objects', () => {
-  it('should be equal given circular objects', () => {
+  test('should be equal given circular objects', () => {
     const circularObj = { name: 'circle' };
     circularObj.circular = circularObj;
     equal(isEqual(circularObj, circularObj), true);
   });
-  // what if one has one circlular ref, and the other a diffrent one?
-  it('should not be equal given circular objects with different values', () => {
+  test('should not be equal given circular objects with different values', () => {
     const circularObj = { name: 'circle' };
     circularObj.circular = circularObj;
     const circularObj2 = { name: 'circle2' };

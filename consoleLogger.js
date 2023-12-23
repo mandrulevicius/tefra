@@ -1,11 +1,21 @@
-import { attachGlobal } from "./globalizer";
+import { attachGlobal } from "./globalizer.js";
 
 let logToConsole = true;
 
+/**
+ * Sets whether logging should output to the console.
+ * @param {boolean} value - True to enable console logging, false to disable.
+ */
 function setLogToConsole(value) {
   logToConsole = value;
 }
 
+/**
+ * Logs the results of running all tests in a file.
+ * Logs the grouped test results recursively, then logs the total counts.
+ *
+ * @param {Object} results - Results object
+ */
 function logFileResults(results) {
   if (!logToConsole) return;
   logGroupResults(results, 0);
@@ -41,16 +51,21 @@ function logSpecResult(spec, depth = 0) {
   }
 }
 
+/**
+ * Logs the totals for current test results.
+ *
+ * @param {Object} results - Results object
+ */
 function logTotals(results) {
   if (!logToConsole) return;
-  if (!results.parent) console.log('~~~ Total Results ~~~');
+  if (!results.parent) console.log(`~~~ Total Results ~~~`);
   console.log(`Status: ${results.status}`);
   console.log(`  Passed: ${results.passed}`);
   console.log(`  Failed: ${results.failed}`);
   console.log(`  Error: ${results.error}`);
   console.log(`  Total: ${results.total}`);
   console.log(`  Duration: ${results.duration.toFixed(3)} ms`);
-  console.log('\n');
+  console.log(`\n`);
 }
 
 attachGlobal(setLogToConsole);

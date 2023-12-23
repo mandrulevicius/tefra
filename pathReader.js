@@ -1,20 +1,29 @@
-import { existsSync, readdirSync, lstatSync, statSync } from 'fs';
-// lstatSync and statSync difference is symbolicLinks.
-// figure out if relevant.
+import { existsSync, readdirSync, statSync } from 'fs';
 import { join, basename } from 'path';
 import { checkType } from './typeChecker.js';
 
-// what if we want to exclude specific paths, and have duplicate names in different paths?
+/**
+ * Retrieves all files with the given file extension recursively in the given path,
+ * excluding any files and folders in the excludedNames array.
+ *
+ * @param {string} targetPath - The path to search in
+ * @param {string} extension - The file extension to match
+ * @param {string[]} excludedNames - File names to exclude
+ * @returns {string[]} Array of matching file paths
+ * @throws {Error} If no valid files are found
+ */
 export function getFiles(targetPath = './', extension = '.js', excludedNames = []) {
   checkType(targetPath, 'string');
   checkType(excludedNames, 'array');
   excludedNames.forEach(name => checkType(name, 'string'));
   const isDirectory = checkPath(targetPath, excludedNames);
   if (!isDirectory) return getFile(targetPath, extension);
-  const fileNames = getFilesFromDir(targetPath, extension, excludedNames);
-  if (fileNames.length === 0) throw new Error(`No valid files found in path '${targetPath}'`);
-  return fileNames;
+  const files = getFilesFromDir(targetPath, extension, excludedNames);
+  if (files.length === 0) throw new Error(`No valid files found in path '${targetPath}'`);
+  return files;
 }
+// what if we want to exclude specific paths, and have duplicate names in different paths?
+// TODO add option to exclude full paths rather than names
 
 function checkPath(targetPath, excludedNames) {
   if (!existsSync(targetPath)) {
@@ -32,15 +41,15 @@ function getFile(targetPath, extension) {
 }
 
 function getFilesFromDir(targetDirPath, extension, excludedNames) { // Recursive
-  let fileNames = [];
+  let files = [];
   readdirSync(targetDirPath).forEach(name => { // this is synchronous loop, may impact performance
     if (excludedNames.includes(name)) return;
     const fullPath = join(targetDirPath, name);
-    if (lstatSync(fullPath).isDirectory()) {
-      fileNames = fileNames.concat(getFilesFromDir(fullPath, extension, excludedNames));
-    } else if (fullPath.endsWith(extension)) fileNames.push(fullPath);
+    if (statSync(fullPath).isDirectory()) {
+      files = files.concat(getFilesFromDir(fullPath, extension, excludedNames));
+    } else if (fullPath.endsWith(extension)) files.push(fullPath);
   });
-  return fileNames;
+  return files;
 }
 
 export default { getFiles };

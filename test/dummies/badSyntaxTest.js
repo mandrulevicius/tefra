@@ -1,7 +1,7 @@
 setLogToConsole(false);
 const incorrectSyntaxResults = {};
 try {
-  it('it without describe', () => {
+  test('test without describe', () => {
     equal('t1', 't1');
   });
 } catch (error) {
@@ -9,8 +9,8 @@ try {
 }
 try {
   describe('outer describe', () => {
-    it('it with nested describe', () => {
-      describe('nested describe inside it', () => {
+    test('test with nested describe', () => {
+      describe('nested describe inside test', () => {
       });
     });
   });
@@ -19,8 +19,8 @@ try {
 }
 try {
   describe('outer describe', () => {
-    it('it with nested it', () => {
-      it('inner it', () => {
+    test('test with nested test', () => {
+      test('inner test', () => {
         equal('t1', 't1');
       });
     });
@@ -59,28 +59,28 @@ try {
 
 describe('test bad its', () => {
   try {
-    it(23, () => {});
+    test(23, () => {});
   } catch (error) {
     incorrectSyntaxResults.itWithNumberName = error;
   }
   try {
-    it('ba', 'bad it arg');
+    test('ba', 'bad test arg');
   } catch (error) {
     incorrectSyntaxResults.itWithBadFunc = error;
   }
   try {
-    it();
+    test();
   } catch (error) {
     incorrectSyntaxResults.itWithoutArgs = error;
   }
   try {
-    it('no function in it');
+    test('no function in test');
   } catch (error) {
     incorrectSyntaxResults.itWithoutFunc = error;
   }
   try {
-    it('duplicate name', () => {});
-    it('duplicate name', () => {});
+    test('duplicate name', () => {});
+    test('duplicate name', () => {});
   } catch (error) {
     incorrectSyntaxResults.duplicateItName = error;
   }
@@ -103,8 +103,8 @@ try {
   incorrectSyntaxResults.topLevelBeforeEach = error;
 };
 try {
-  describe('bad describe - beforeEach in it', () => {
-    it('it with nested beforeEach', () => {
+  describe('bad describe - beforeEach in test', () => {
+    test('test with nested beforeEach', () => {
       beforeEach(() => {
       });
     });
@@ -118,7 +118,7 @@ try {
       describe('error in describe', () => {
       });
     });
-    describe('beforeEach callback only runs if there is describe or it in same level', () => {
+    describe('beforeEach callback only runs if there is describe or test in same level', () => {
     });
   });
 } catch (error) {
@@ -147,16 +147,16 @@ try {
 // TEST should throw async error - maybe wont even need if end result will support async
 
 // describe('testAsync', () => {
-//   it('should pass - return same value as argument', () => {
+//   test('should pass - return same value as argument', () => {
 //     //equal(await echoer.asyncFunc('t1'), 't1');
 //     echoer.asyncFunc('t1').then((result) => { equal(result, 't1') })
 //   });
-//   it('should fail', () => {
+//   test('should fail', () => {
 //     //equal(await echoer.asyncFunc('t1'), 't2');
 //     echoer.asyncFunc('t1').then((result) => { equal(result, 't2') }).catch((error) => {throw error})
 //     // this still results in the equal result not being caught properly
 //   });
-//   // it('should catch error', async () => {
+//   // test('should catch error', async () => {
 //   //   throwsError(echoer.asyncFunc, new Error('bad'), 't1');
 //   // });
 // });
