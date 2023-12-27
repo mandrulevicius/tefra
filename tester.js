@@ -182,17 +182,10 @@ attachGlobal(getResults);
 export default { initFileTest, clearResults };
 
 // DESIGN:
-// tester is core, should not care about output types. But real life is messy, so here we are.
-// in this case, for a test framework, smooth consumer experience is absolutely essential,
-// so better to leave a dependency rather than overengineer and add extra baggage for consumer.
-// Why not have both? expose the abstraction?
-// currently, dont see any gains for the additional complexity.
-// if at any point potential gains become apparent, will refactor.
-
-// DESIGN:
 // should think about how to restructure this. 
 // this cares too much about files.
 // tester should just test and produce result.
 // testRunner should just run files and collect results.
 // testRunner should clear results after each file?
 // CURRENTLY NOT SURE WHAT STRUCTURE WOULD BE BETTER
+// issue might solve itself with rework for async support

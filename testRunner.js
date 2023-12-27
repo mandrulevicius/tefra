@@ -3,8 +3,6 @@ import './asserter.js';
 import tester from './tester.js';
 import consoleLogger from './consoleLogger.js';
 
-// if any tests fail, maybe should throw results afterwards? (for pipelines)
-
 const defaultExcludedNames = ['node_modules', '.git'];
 const defaultPath = 'test';
 
@@ -32,6 +30,7 @@ async function runTests(customTargetPath, customExcludedNames = []) {
   //const results = globalTester.run(); // async?
   consoleLogger.logTotals(results);
   return results;
+// if any tests fail, maybe should throw results afterwards? (for pipelines)
 }
 
 export default { runTests };

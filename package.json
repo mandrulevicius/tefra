@@ -5,7 +5,15 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "tefra": "node index.js"
+  },
+  "bin": {
+    "tefra": "./index.js" 
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mandrulevicius/tefra"
   },
   "author": "Mindaugas Andrulevicius",
   "license": "MIT"
