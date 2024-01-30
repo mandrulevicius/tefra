@@ -81,4 +81,5 @@ setLogToConsole(false);
 ```
 
 ## Warning
-This is an experimental project not meant for use in production!
+This is an experimental low priority project. Maintenance not scheduled.
+Should not be used in production.
