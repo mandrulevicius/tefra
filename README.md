@@ -36,9 +36,6 @@ beforeEach(setupFunction);
 afterEach(teardownFunction);
 ```
 
-#### Async support
-Work in progress...
-
 ## Usage
 1. Create a file ending with .test.js
 2. Import file under test
@@ -79,6 +76,9 @@ Disable logging to console:
 ```js
 setLogToConsole(false);
 ```
+
+#### Async support
+Currently does not support asynchronous operations.
 
 ## Warning
 This is an experimental low priority project. Maintenance not scheduled.
