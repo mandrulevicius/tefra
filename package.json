@@ -15,9 +15,6 @@
     "type": "git",
     "url": "https://github.com/mandrulevicius/tefra"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "author": "Mindaugas Andrulevicius",
   "license": "MIT"
 }
