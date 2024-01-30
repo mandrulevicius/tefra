@@ -2,7 +2,7 @@
 A small project for practice writing cleaner code and more structured architecture.
 
 ## Installation
-Work In Progress
+Work in progress...
 
 ## Run
 Run from command line:
@@ -19,19 +19,10 @@ await testRunner.runTests(pathUnderTest, exclusions);
 
 ## Features
 #### Basic asserter
-Deep equality:
 ```js
-equal(actual, expected);
-```
-
-Reference equality:
-```js
-is(actual, expected);
-```
-
-Error check:
-```js
-throwsError(func, expectedError, ...args)
+equal(actual, expected); // Deep equality
+is(actual, expected); // Reference equality
+throwsError(func, expectedError, ...args) // Error assertion
 ```
 
 #### Basic test runner
@@ -43,7 +34,7 @@ afterEach(teardownFunction);
 ```
 
 #### Async support
-Work In Progress
+Work in progress...
 
 ## Usage
 1. Create a file ending with .test.js
