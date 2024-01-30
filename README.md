@@ -15,17 +15,9 @@ Add to your package.json:
 }
 ```
 
-## Run
 Run from command line:
 ```
 npm test [optional test path] [optional excluded file or folder]
-```
-
-Can also run from code by importing testRunner:
-```js
-import testRunner from './testRunner.js';
-
-await testRunner.runTests(pathUnderTest, exclusions);
 ```
 
 ## Features

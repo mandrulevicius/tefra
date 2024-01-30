@@ -1,3 +1,5 @@
+// Old dead end - might need to take some parts for new solution
+
 import consoleLogger from './consoleLogger.js';
 
 function Result(status, passed = 0, failed = 0, errors = 0, total = 0, details = {}) {
