@@ -27,17 +27,17 @@ export function is(actual, expected) {
 }
 
 /**
- * Tests if calling a callback function throws an expected error.
+ * Tests if calling a function throws an expected error.
  *
- * @param {Function} callback - The callback function to test.
+ * @param {Function} func - Function to test.
  * @param {Error} expectedError - The expected error to be thrown.
  * @param {...*} args - Any arguments to pass to the callback.
  * @returns {boolean} True if the expected error was thrown, otherwise throws object.
  * @throws {object} Throws an object containing the actual and expected values.
 */
-export function throwsError(callback, expectedError, ...args) {
+export function throwsError(func, expectedError, ...args) {
   try {
-    callback(...args);
+    func(...args);
     throw { actual: 'No error', expected: expectedError };
   } catch (error) {
     if (error.message === expectedError.message) return true;
