@@ -1,32 +1,13 @@
-## Tefra - basic test framework
-A small project for practice writing cleaner code and more structured architecture. 
-
-## Features
-#### Basic asserter
-- equal(actual, expected) - Deep equality
-- is(actual, expected) - Reference equality
-- throwsError(func, expectedError, ...args) - Error checker
-
-#### Basic test runner
-- beforeEach, afterEach
-- describe, test
-
-#### Async support
-Work In Progress
+## Tefra - a basic test framework
+A small project for practice writing cleaner code and more structured architecture.
 
 ## Installation
 Work In Progress
 
-## Config
-Disable logging to console:
-```js
-setLogToConsole(false);
-```
-
 ## Run
 Run from command line:
 ```
-npm test [optional test path] [optional excluded path or file]
+npm test [optional test path] [optional excluded file or folder]
 ```
 
 Can also run from code by importing testRunner:
@@ -36,12 +17,40 @@ import testRunner from './testRunner.js';
 await testRunner.runTests(pathUnderTest, exclusions);
 ```
 
+## Features
+#### Basic asserter
+Deep equality:
+```js
+equal(actual, expected);
+```
+
+Reference equality:
+```js
+is(actual, expected);
+```
+
+Error check:
+```js
+throwsError(func, expectedError, ...args)
+```
+
+#### Basic test runner
+```js
+describe(groupName, groupFunction);
+test(specName, specFunction);
+beforeEach(setupFunction);
+afterEach(teardownFunction);
+```
+
+#### Async support
+Work In Progress
+
 ## Usage
-- Create a file ending with .test.js
-- Import file under test
-- describe the test
-- assert the test
-- Run tests
+1. Create a file ending with .test.js
+2. Import file under test
+3. Describe the test
+4. Assert the test
+5. Run tests
 
 ## Example
 echoer.test.js
@@ -70,3 +79,12 @@ describe('testBlockOuter', () => {
   });
 });
 ```
+
+## Config
+Disable logging to console:
+```js
+setLogToConsole(false);
+```
+
+## Warning
+This is an experimental project not meant for use in production!
