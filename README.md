@@ -2,7 +2,18 @@
 A small project for practice writing cleaner code and more structured architecture.
 
 ## Installation
-Work in progress...
+```
+npm install tefra
+```
+
+Add to your package.json:
+```json
+{
+  "scripts": {
+    "test": "tefra"
+  }
+}
+```
 
 ## Run
 Run from command line:

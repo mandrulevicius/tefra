@@ -22,7 +22,7 @@ async function runTests(customTargetPath, customExcludedNames = []) {
   for (const testFile of jsFiles) {
     // really want to add them to queue rather than run right now
     tester.initFileTest(testFile);
-    await import('./' + testFile);
+    await import(testFile);
     consoleLogger.logFileResults(getResults(testFile));
   }
   const results = getResults();

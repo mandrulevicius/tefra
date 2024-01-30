@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, statSync } from 'fs';
-import { join, basename } from 'path';
+import { join, basename, resolve } from 'path';
+import { pathToFileURL } from 'url';
 import { checkType } from './typeChecker.js';
 
 /**
@@ -16,10 +17,11 @@ export function getFiles(targetPath = './', extension = '.js', excludedNames = [
   checkType(targetPath, 'string');
   checkType(excludedNames, 'array');
   excludedNames.forEach(name => checkType(name, 'string'));
-  const isDirectory = checkPath(targetPath, excludedNames);
-  if (!isDirectory) return getFile(targetPath, extension);
-  const files = getFilesFromDir(targetPath, extension, excludedNames);
-  if (files.length === 0) throw new Error(`No valid files found in path '${targetPath}'`);
+  const absolutePath = resolve(targetPath);
+  const isDirectory = checkPath(absolutePath, excludedNames);
+  if (!isDirectory) return getFile(absolutePath, extension);
+  const files = getFilesFromDir(absolutePath, extension, excludedNames);
+  if (files.length === 0) throw new Error(`No valid files found in path '${absolutePath}'`);
   return files;
 }
 // what if we want to exclude specific paths, and have duplicate names in different paths?
@@ -36,7 +38,7 @@ function checkPath(targetPath, excludedNames) {
 }
 
 function getFile(targetPath, extension) {
-  if (targetPath.endsWith(extension)) return [targetPath];
+  if (targetPath.endsWith(extension)) return [pathToFileURL(targetPath)];
   else throw new Error(`Invalid file '${targetPath}', expected '*${extension}'`);
 }
 
@@ -47,7 +49,7 @@ function getFilesFromDir(targetDirPath, extension, excludedNames) { // Recursive
     const fullPath = join(targetDirPath, name);
     if (statSync(fullPath).isDirectory()) {
       files = files.concat(getFilesFromDir(fullPath, extension, excludedNames));
-    } else if (fullPath.endsWith(extension)) files.push(fullPath);
+    } else if (fullPath.endsWith(extension)) files.push(pathToFileURL(fullPath));
   });
   return files;
 }
