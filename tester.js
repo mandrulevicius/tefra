@@ -24,6 +24,8 @@ function initFileTest(fileName) {
  * Clears the test results for a given file name.
  * If no file name is provided, clears all test results and resets to initial state.
  * If a file name is provided, removes only that file's results.
+ * 
+ * @param {string} fileName - The name of the test file being initialized
  */
 function clearResults(fileName) {
   if (!fileName) results = new Result('root');
@@ -39,6 +41,8 @@ function clearState() {
  * Gets the test results for a given test file.
  * If no file is provided, returns the root test results.
  * If a file is provided, returns the results for that specific file.
+ * 
+ * @param {string} testFile - The name of the test file being initialized
  */
 function getResults(testFile) {
   if (!testFile) return results.getResults();
